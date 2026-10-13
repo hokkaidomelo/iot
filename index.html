@@ -1,0 +1,2535 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="mono">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>LAB SOP // CYBER REFERENCE</title>
+<meta name="description" content="Lab SOP — graphene, MoS₂ QDs, PL/Abs spectroscopy & H₂ gas purifier, rebuilt in the RKrint cyber style." />
+<meta name="theme-color" content="#111111" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23111111'/%3E%3Ccircle cx='50' cy='50' r='39' fill='none' stroke='%23ffffff' stroke-width='14'/%3E%3Crect x='44' y='80' width='12' height='14' fill='%23111111'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Chakra+Petch:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+<script>
+/* 首幀前決定主題，避免換色閃白。優先序：localStorage → #theme= → mono */
+(function(){
+  var v='mono';
+  try{
+    var s=localStorage.getItem('rk-theme');
+    if(!s){ var m=location.hash.match(/theme=(mono|ultra|light|dark)/); if(m) s=m[1]; }
+    if(s==='mono'||s==='ultra'||s==='light'||s==='dark') v=s;
+  }catch(e){}
+  document.documentElement.setAttribute('data-theme',v);
+  document.documentElement.classList.add('js');
+})();
+</script>
+<style>
+  :root{
+    --radius:12px;
+    /* 面板識別：線條樣式（GR 實線 / MoS₂ 虛線 / PL 雙線 / H₂ 點線） */
+    --bd-style:solid;
+    --bd-w:1px;
+    --bar-fx:var(--accent);
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     THEME TOKENS — 四種模式
+       mono  : 預設（深灰底 · 灰介面 · 白色主要重點）
+       ultra : 原始 RKrint ULTRA（深紫 + 檸檬黃）
+       light : 純白底 · 純紅重點
+       dark  : 純黑底 · 純紅重點
+     mono 模式以 #ffffff（白）作為主色、#888 灰作為介面色、#111 深灰作為底
+     ══════════════════════════════════════════════════════════════ */
+
+  html[data-theme="mono"]{
+    --bg:#111111;
+    --bg-fx:
+      radial-gradient(1200px 900px at 78% 8%, rgba(255,255,255,.06), transparent 60%),
+      radial-gradient(1000px 800px at 12% 92%, rgba(255,255,255,.04), transparent 55%),
+      radial-gradient(700px 600px at 55% 50%, rgba(255,255,255,.02), transparent 60%);
+    --bg-grad:linear-gradient(180deg,#151515 0%,#111111 60%,#0e0e0e 100%);
+
+    --fg:#cccccc;
+    --muted:#777777;
+    --muted-2:rgba(204,204,204,.40);
+    --ink:#111111;
+
+    --accent:#ffffff;
+    --accent-2:#e8e8e8;
+    --accent-glow:rgba(255,255,255,.35);
+    --on-accent:#111111;
+    --focus:#ffffff;
+
+    --line:rgba(255,255,255,.16);
+    --line-soft:rgba(255,255,255,.08);
+    --table-line:rgba(255,255,255,.08);
+    --grid-line:rgba(255,255,255,.04);
+
+    --panel:rgba(255,255,255,.04);
+    --panel-solid:#1a1a1a;
+    --panel-2:rgba(255,255,255,.06);
+    --panel-3:rgba(255,255,255,.05);
+    --tint-1:rgba(255,255,255,.02);
+    --tint-2:rgba(255,255,255,.03);
+    --tab-tint:rgba(255,255,255,.04);
+    --hover-fx:radial-gradient(120px circle at 50% 0, rgba(255,255,255,.14), transparent 60%);
+    --icon-glow:rgba(255,255,255,.20);
+
+    --chip-bg:rgba(255,255,255,.08);
+    --chip-bd:rgba(255,255,255,.20);
+    --chip-glow:rgba(255,255,255,.08);
+
+    --strip:#ffffff;
+    --on-strip:#111111;
+    --idx:#666666;
+    --dim:#555555;
+    --orb-cut:#111111;
+
+    --scan:rgba(255,255,255,.04);
+    --scan-blend:screen;
+    --scan-op:.25;
+    --vignette:rgba(0,0,0,.70);
+    --noise-op:.06;
+
+    --ticker-bg:rgba(17,17,17,.80);
+    --tabbar-bg:rgba(17,17,17,.85);
+    --tab-active-bg:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.02));
+    --tab-active-glow:rgba(255,255,255,.18);
+    --boot-bg:radial-gradient(900px 760px at 50% 42%, rgba(255,255,255,.06), #111111 72%);
+    --boot-grid:rgba(255,255,255,.04);
+    --bar-bg:rgba(255,255,255,.12);
+    --bar-fill:#ffffff;
+    --shadow:rgba(0,0,0,.60);
+    --shadow-2:rgba(0,0,0,.50);
+    --corner-op:.40;
+
+    --warn:#e0a040;
+    --danger:#e05050;
+    --good:#ffffff;
+    --warn-soft:rgba(224,160,64,.10);
+    --danger-soft:rgba(224,80,80,.12);
+
+    /* mono 模式：所有面板共用純白，改以線條樣式區分 */
+    --accent-gr:#ffffff;
+    --accent-mos2:#ffffff;
+    --accent-pl:#ffffff;
+    --accent-h2:#ffffff;
+    --accent-ar:#ffffff;
+  }
+
+  html[data-theme="ultra"]{
+    --bg:#0b0016;
+    --bg-fx:
+      radial-gradient(1200px 900px at 78% 8%, rgba(90,0,255,.40), transparent 60%),
+      radial-gradient(1000px 800px at 12% 92%, rgba(90,0,255,.30), transparent 55%),
+      radial-gradient(700px 600px at 55% 50%, rgba(122,44,255,.14), transparent 60%);
+    --bg-grad:linear-gradient(180deg,#12001f 0%,#0b0016 60%,#0b0016 100%);
+
+    --fg:#eae6ff;
+    --muted:#8b83c0;
+    --muted-2:rgba(234,230,255,.45);
+    --ink:#04020a;
+
+    --accent:#D6FF00;
+    --accent-2:#c4f000;
+    --accent-glow:rgba(214,255,0,.6);
+    --on-accent:#04020a;
+    --focus:#D6FF00;
+
+    --line:rgba(214,255,0,.22);
+    --line-soft:rgba(214,255,0,.10);
+    --table-line:rgba(214,255,0,.10);
+    --grid-line:rgba(214,255,0,.05);
+
+    --panel:rgba(20,0,42,.42);
+    --panel-solid:#140026;
+    --panel-2:rgba(20,0,42,.60);
+    --panel-3:rgba(20,0,42,.50);
+    --tint-1:rgba(214,255,0,.03);
+    --tint-2:rgba(90,0,255,.08);
+    --tab-tint:rgba(90,0,255,.10);
+    --hover-fx:radial-gradient(120px circle at 50% 0, rgba(214,255,0,.25), transparent 60%);
+    --icon-glow:rgba(214,255,0,.25);
+
+    --chip-bg:rgba(214,255,0,.10);
+    --chip-bd:rgba(214,255,0,.22);
+    --chip-glow:rgba(214,255,0,.10);
+
+    --strip:#D6FF00;
+    --on-strip:#04020a;
+    --idx:#7a2cff;
+    --dim:#5a5e72;
+    --orb-cut:#04020a;
+
+    --scan:rgba(0,0,0,.22);
+    --scan-blend:overlay;
+    --scan-op:.30;
+    --vignette:rgba(0,0,0,.72);
+    --noise-op:.05;
+
+    --ticker-bg:rgba(11,0,22,.75);
+    --tabbar-bg:rgba(11,0,22,.82);
+    --tab-active-bg:linear-gradient(160deg,#1c0a33,#0b0016);
+    --tab-active-glow:rgba(214,255,0,.28);
+    --boot-bg:radial-gradient(900px 760px at 50% 42%,#1b0236,#0b0016 72%);
+    --boot-grid:rgba(214,255,0,.06);
+    --bar-bg:rgba(214,255,0,.14);
+    --bar-fill:#D6FF00;
+    --shadow:rgba(0,0,0,.60);
+    --shadow-2:rgba(0,0,0,.50);
+    --corner-op:.45;
+
+    --warn:#ffd166;
+    --danger:#ff6b7b;
+    --good:#D6FF00;
+    --warn-soft:rgba(255,209,102,.10);
+    --danger-soft:rgba(255,107,123,.12);
+
+    /* per-panel accents — ultra 保留原始色相（第 4 面板為洋紅） */
+    --accent-gr:#d6ff00;
+    --accent-mos2:#a78bfa;
+    --accent-pl:#57e6d8;
+    --accent-h2:#ff7ae0;
+    --accent-ar:#ff7ae0;
+  }
+
+  html[data-theme="light"]{
+    --bg:#ffffff;
+    --bg-fx:
+      radial-gradient(1100px 820px at 80% 4%, rgba(255,0,0,.10), transparent 62%),
+      radial-gradient(900px 720px at 8% 96%, rgba(255,0,0,.08), transparent 58%),
+      radial-gradient(700px 600px at 55% 50%, rgba(255,0,0,.03), transparent 60%);
+    --bg-grad:linear-gradient(180deg,#ffffff 0%,#ffffff 100%);
+
+    --fg:#000000;
+    --muted:rgba(0,0,0,.62);
+    --muted-2:rgba(0,0,0,.38);
+    --ink:#ffffff;
+
+    --accent:#ff0000;
+    --accent-2:#ff0000;
+    --accent-glow:rgba(255,0,0,.55);
+    --on-accent:#ffffff;
+    --focus:#ff0000;
+
+    --line:rgba(255,0,0,.30);
+    --line-soft:rgba(255,0,0,.12);
+    --table-line:rgba(0,0,0,.10);
+    --grid-line:rgba(255,0,0,.10);
+
+    --panel:rgba(255,255,255,.72);
+    --panel-solid:#ffffff;
+    --panel-2:rgba(255,0,0,.05);
+    --panel-3:rgba(255,0,0,.04);
+    --tint-1:rgba(255,0,0,.03);
+    --tint-2:rgba(255,0,0,.05);
+    --tab-tint:rgba(255,0,0,.05);
+    --hover-fx:radial-gradient(120px circle at 50% 0, rgba(255,0,0,.16), transparent 60%);
+    --icon-glow:rgba(255,0,0,.25);
+
+    --chip-bg:rgba(255,0,0,.08);
+    --chip-bd:rgba(255,0,0,.30);
+    --chip-glow:rgba(255,0,0,.10);
+
+    --strip:#ff0000;
+    --on-strip:#ffffff;
+    --idx:rgba(0,0,0,.45);
+    --dim:rgba(0,0,0,.34);
+    --orb-cut:#ffffff;
+
+    --scan:rgba(0,0,0,.06);
+    --scan-blend:multiply;
+    --scan-op:.55;
+    --vignette:rgba(0,0,0,.10);
+    --noise-op:.05;
+
+    --ticker-bg:rgba(255,255,255,.80);
+    --tabbar-bg:rgba(255,255,255,.85);
+    --tab-active-bg:linear-gradient(160deg,rgba(255,0,0,.12),rgba(255,0,0,.02));
+    --tab-active-glow:rgba(255,0,0,.30);
+    --boot-bg:radial-gradient(900px 760px at 50% 42%, rgba(255,0,0,.05), #ffffff 72%);
+    --boot-grid:rgba(255,0,0,.08);
+    --bar-bg:rgba(255,0,0,.12);
+    --bar-fill:#ff0000;
+    --shadow:rgba(0,0,0,.18);
+    --shadow-2:rgba(0,0,0,.14);
+    --corner-op:.55;
+
+    --warn:#ff0000;
+    --danger:#ff0000;
+    --good:#000000;
+    --warn-soft:rgba(255,0,0,.07);
+    --danger-soft:rgba(255,0,0,.12);
+
+    /* 三色模式：所有面板共用純紅，改以線條樣式區分 */
+    --accent-gr:#ff0000;
+    --accent-mos2:#ff0000;
+    --accent-pl:#ff0000;
+    --accent-h2:#ff0000;
+    --accent-ar:#ff0000;
+  }
+
+  html[data-theme="dark"]{
+    --bg:#000000;
+    --bg-fx:
+      radial-gradient(1100px 820px at 80% 4%, rgba(255,0,0,.22), transparent 62%),
+      radial-gradient(900px 720px at 8% 96%, rgba(255,0,0,.16), transparent 58%),
+      radial-gradient(700px 600px at 55% 50%, rgba(255,0,0,.07), transparent 60%);
+    --bg-grad:linear-gradient(180deg,#000000 0%,#000000 100%);
+
+    --fg:#ffffff;
+    --muted:rgba(255,255,255,.62);
+    --muted-2:rgba(255,255,255,.38);
+    --ink:#000000;
+
+    --accent:#ff0000;
+    --accent-2:#ff0000;
+    --accent-glow:rgba(255,0,0,.55);
+    --on-accent:#ffffff;
+    --focus:#ff0000;
+
+    --line:rgba(255,0,0,.34);
+    --line-soft:rgba(255,0,0,.15);
+    --table-line:rgba(255,255,255,.10);
+    --grid-line:rgba(255,0,0,.13);
+
+    --panel:rgba(255,255,255,.045);
+    --panel-solid:rgba(255,255,255,.06);
+    --panel-2:rgba(255,255,255,.06);
+    --panel-3:rgba(255,255,255,.05);
+    --tint-1:rgba(255,0,0,.05);
+    --tint-2:rgba(255,0,0,.07);
+    --tab-tint:rgba(255,0,0,.08);
+    --hover-fx:radial-gradient(120px circle at 50% 0, rgba(255,0,0,.30), transparent 60%);
+    --icon-glow:rgba(255,0,0,.30);
+
+    --chip-bg:rgba(255,0,0,.14);
+    --chip-bd:rgba(255,0,0,.40);
+    --chip-glow:rgba(255,0,0,.18);
+
+    --strip:#ff0000;
+    --on-strip:#ffffff;
+    --idx:rgba(255,255,255,.45);
+    --dim:rgba(255,255,255,.34);
+    --orb-cut:#000000;
+
+    --scan:rgba(255,255,255,.07);
+    --scan-blend:screen;
+    --scan-op:.50;
+    --vignette:rgba(0,0,0,.85);
+    --noise-op:.10;
+
+    --ticker-bg:rgba(0,0,0,.78);
+    --tabbar-bg:rgba(0,0,0,.85);
+    --tab-active-bg:linear-gradient(160deg,rgba(255,0,0,.22),rgba(255,0,0,.04));
+    --tab-active-glow:rgba(255,0,0,.35);
+    --boot-bg:radial-gradient(900px 760px at 50% 42%, rgba(255,0,0,.12), #000000 72%);
+    --boot-grid:rgba(255,0,0,.10);
+    --bar-bg:rgba(255,0,0,.18);
+    --bar-fill:#ff0000;
+    --shadow:rgba(0,0,0,.70);
+    --shadow-2:rgba(0,0,0,.60);
+    --corner-op:.55;
+
+    --warn:#ff0000;
+    --danger:#ff0000;
+    --good:#ffffff;
+    --warn-soft:rgba(255,0,0,.10);
+    --danger-soft:rgba(255,0,0,.18);
+
+    /* 三色模式：所有面板共用純紅，改以線條樣式區分 */
+    --accent-gr:#ff0000;
+    --accent-mos2:#ff0000;
+    --accent-pl:#ff0000;
+    --accent-h2:#ff0000;
+    --accent-ar:#ff0000;
+  }
+
+  /* 灰階噪點（去飽和，保證不會帶入黑/白/紅以外的色相） */
+  :root{
+    --noise-img:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Chakra Petch','Noto Sans TC',system-ui,sans-serif;
+    color:var(--fg);
+    background:var(--bg);
+    min-height:100vh;
+    overflow-x:hidden;
+    letter-spacing:.02em;
+    line-height:1.65;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* 換主題時的顏色交叉淡入（只過渡顏色，不動 transform，避免干擾面板滑動） */
+  html.switching,html.switching *{
+    transition:background-color .4s ease,color .4s ease,border-color .4s ease,
+               box-shadow .4s ease,fill .4s ease,opacity .4s ease,outline-color .4s ease !important;
+  }
+
+  /* ===== cyber background layers ===== */
+  .bg{
+    position:fixed;inset:0;z-index:-3;pointer-events:none;
+    background:var(--bg-fx),var(--bg-grad);
+  }
+  .grid{
+    position:fixed;inset:0;z-index:-2;pointer-events:none;
+    background-image:
+      linear-gradient(var(--grid-line) 1px,transparent 1px),
+      linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);
+    background-size:46px 46px;
+    mask-image:radial-gradient(ellipse 90% 90% at 50% 30%, #000 30%, transparent 80%);
+    -webkit-mask-image:radial-gradient(ellipse 90% 90% at 50% 30%, #000 30%, transparent 80%);
+    animation:gridDrift 18s linear infinite;
+  }
+  @keyframes gridDrift{to{background-position:46px 0,46px 0}}
+  .noise{
+    position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:var(--noise-op);
+    background-image:var(--noise-img);
+    animation:grain 1.6s steps(2) infinite;
+  }
+  @keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-2%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(0,0)}}
+  .scanlines{
+    position:fixed;inset:0;z-index:50;pointer-events:none;opacity:var(--scan-op);mix-blend-mode:var(--scan-blend);
+    background:repeating-linear-gradient(0deg, var(--scan) 0 1px, transparent 1px 3px);
+  }
+  .vignette{
+    position:fixed;inset:0;z-index:1;pointer-events:none;
+    box-shadow:inset 0 0 240px var(--vignette);
+  }
+  .orb-cut{fill:var(--orb-cut)}
+
+  /* vertical marquee strip — index signature */
+  .vstrip{
+    position:fixed;top:0;right:0;height:100vh;width:clamp(44px,4vw,60px);z-index:6;
+    background:var(--strip);display:flex;align-items:center;justify-content:center;overflow:hidden;
+    box-shadow:-10px 0 40px var(--shadow);
+  }
+  .vstrip span{
+    writing-mode:vertical-rl;font-family:'Anton';color:var(--on-strip);text-transform:uppercase;
+    font-size:clamp(24px,3.4vw,40px);letter-spacing:.04em;white-space:nowrap;
+  }
+
+  /* ---- page container ---- */
+  .wrap{
+    max-width:580px;margin:0 auto;padding:22px clamp(16px,4vw,24px) 150px 22px;
+    position:relative;z-index:5;
+  }
+
+  /* ---- top ticker ---- */
+  .ticker{
+    position:fixed;top:0;left:0;right:0;height:30px;z-index:60;overflow:hidden;
+    background:var(--ticker-bg);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;white-space:nowrap;
+  }
+  .ticker-track{display:inline-flex;align-items:center;will-change:transform;animation:tick 28s linear infinite}
+  .ticker-track span{
+    font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--muted);padding:0 26px;display:inline-flex;align-items:center;gap:12px;
+  }
+  .ticker-track span b{color:var(--accent);font-weight:400}
+  .ticker-track span::after{content:"▮";color:var(--idx);opacity:.6;margin-left:26px}
+  @keyframes tick{to{transform:translateX(-50%)}}
+
+  /* ---- theme switcher ---- */
+  .thm{
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    padding:10px 0 0;font-family:'Share Tech Mono',monospace;
+    font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  }
+  .thm-l{color:var(--muted);margin-right:2px}
+  .thm-b{
+    background:var(--panel-2);border:1px solid var(--line);border-radius:6px;
+    color:var(--muted);font:inherit;letter-spacing:.16em;text-transform:uppercase;
+    padding:5px 9px;cursor:pointer;transition:background-color .22s,border-color .22s,color .22s;
+  }
+  .thm-b:hover{border-color:var(--accent);color:var(--fg)}
+  .thm-b:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  .thm-b[aria-pressed="true"]{
+    background:var(--accent);border-color:var(--accent);
+    color:var(--on-accent);font-weight:700;
+  }
+
+  /* ---- top HUD ---- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:44px 0 12px;border-bottom:1px solid var(--line);
+    font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.14em;
+    color:var(--muted);text-transform:uppercase;
+  }
+  .topbar .left{display:flex;align-items:center;gap:10px}
+  .pulse{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent),0 0 22px var(--accent);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  .topbar .right{display:flex;gap:8px;align-items:center;color:var(--accent)}
+  .topbar .right b{color:var(--fg);font-weight:400}
+
+  /* ---- hero title ---- */
+  .hero{padding:clamp(18px,4vw,32px) 0 clamp(10px,2vw,20px)}
+  .eyebrow{
+    font-family:'Share Tech Mono',monospace;color:var(--accent);letter-spacing:.4em;
+    text-transform:uppercase;font-size:clamp(11px,1.4vw,13px);display:flex;align-items:center;gap:12px;
+    margin-bottom:14px;
+  }
+  .eyebrow::before{content:"";width:34px;height:1px;background:var(--accent);display:inline-block}
+  .brand{
+    font-family:'Anton',sans-serif;
+    font-size:clamp(36px,9vw,64px);
+    line-height:.9;letter-spacing:.02em;text-transform:uppercase;
+    display:flex;align-items:center;gap:clamp(14px,3vw,26px);flex-wrap:wrap;
+  }
+  .brand .word{position:relative;display:inline-block}
+  .brand .word em{font-style:normal;color:var(--accent)}
+  .logo-orb{flex:0 0 auto;width:clamp(48px,10vw,76px);height:clamp(48px,10vw,76px);animation:orbFloat 7s ease-in-out infinite}
+  @keyframes orbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .brand-strip{
+    margin-top:clamp(12px,2vw,18px);display:inline-flex;align-items:center;gap:14px;
+    background:var(--ink);border:1px solid var(--line);padding:9px 14px;border-radius:6px;
+    clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+  }
+  .brand-strip .sub{font-family:'Chakra Petch';font-weight:600;color:var(--accent);letter-spacing:.24em;text-transform:uppercase;font-size:clamp(12px,1.6vw,14px)}
+  .brand-strip .div{width:1px;height:18px;background:var(--accent)}
+  .brand-strip .num{font-family:'Share Tech Mono';color:var(--muted);font-size:12px;letter-spacing:.18em}
+  .hero p.tag{max-width:560px;margin-top:16px;color:var(--muted);line-height:1.65;font-size:clamp(13px,1.5vw,15px)}
+
+  /* ---- panels + per-panel accent mapping ---- */
+  .panel{display:none}
+  .panel.active{display:block}
+  .panel-gr  {--accent:var(--accent-gr);  --bar-fx:var(--accent-gr)}
+  .panel-mos2{--accent:var(--accent-mos2);--bar-fx:var(--accent-mos2)}
+  .panel-pl  {--accent:var(--accent-pl);  --bar-fx:var(--accent-pl)}
+  .panel-h2  {--accent:var(--accent-h2);  --bar-fx:var(--accent-h2)}
+  .panel-ar  {--accent:var(--accent-ar);  --bar-fx:var(--accent-ar)}
+  .panel-cvd {--accent:var(--accent-gr);  --bar-fx:var(--accent-gr)}
+
+  /* 單色模式：色相全部收斂，改用線條樣式區分
+     GR = 實線 solid ／ MoS₂ = 虛線 dashed ／ PL = 雙線 double ／ H₂ = 點線 dotted */
+  html[data-theme="mono"]  .panel-mos2,
+  html[data-theme="light"] .panel-mos2,
+  html[data-theme="dark"]  .panel-mos2{
+    --bd-style:dashed; --bd-w:1px;
+    --bar-fx:repeating-linear-gradient(180deg,var(--accent) 0 4px,transparent 4px 8px);
+  }
+  html[data-theme="mono"]  .panel-pl,
+  html[data-theme="light"] .panel-pl,
+  html[data-theme="dark"]  .panel-pl{
+    --bd-style:double; --bd-w:3px;
+    --bar-fx:linear-gradient(180deg,var(--accent) 0 38%,transparent 38% 62%,var(--accent) 62% 100%);
+  }
+  html[data-theme="mono"]  .panel-h2,
+  html[data-theme="light"] .panel-h2,
+  html[data-theme="dark"]  .panel-h2,
+  html[data-theme="mono"]  .panel-ar,
+  html[data-theme="light"] .panel-ar,
+  html[data-theme="dark"]  .panel-ar{
+    --bd-style:dotted; --bd-w:2px;
+    --bar-fx:repeating-linear-gradient(180deg,var(--accent) 0 2.5px,transparent 2.5px 7px);
+  }
+
+  /* ---- panel switch animation (slide + fade) ---- */
+  @keyframes slideOutLeft{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-72px)}}
+  @keyframes slideOutRight{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(72px)}}
+  @keyframes slideInRight{from{opacity:0;transform:translateX(72px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes slideInLeft{from{opacity:0;transform:translateX(-72px)}to{opacity:1;transform:translateX(0)}}
+  .panel h1{
+    font-family:'Anton';text-transform:uppercase;letter-spacing:.04em;
+    font-size:clamp(24px,6vw,36px);line-height:.95;color:var(--accent);
+    text-shadow:0 0 24px var(--accent-glow);
+    margin:4px 0 8px;
+  }
+  .panel .subtitle{
+    font-family:'Share Tech Mono';letter-spacing:.16em;font-size:12px;color:var(--muted);
+    text-transform:uppercase;margin-bottom:20px;
+  }
+
+  /* ---- section headings ---- */
+  h2{
+    font-family:'Chakra Petch';font-weight:600;
+    font-size:1.02rem;color:var(--fg);
+    margin:26px 0 12px;
+    display:flex;align-items:center;gap:12px;letter-spacing:.03em;
+  }
+  h2 .bar{width:8px;height:22px;background:var(--bar-fx);box-shadow:0 0 16px var(--accent-glow);flex:0 0 auto}
+  h2 .idx{font-family:'Share Tech Mono';font-size:11px;letter-spacing:.16em;color:var(--idx);margin-left:auto;text-transform:uppercase}
+  h3{
+    font-family:'Chakra Petch';font-weight:600;font-size:.9rem;color:var(--fg);
+    margin:14px 0 8px;
+  }
+
+  /* ---- glass card ---- */
+  .card{
+    background:var(--panel);-webkit-backdrop-filter:blur(12px) saturate(1.15);backdrop-filter:blur(12px) saturate(1.15);
+    border:var(--bd-w) var(--bd-style) var(--line);border-radius:var(--radius);
+    padding:16px;margin:12px 0;position:relative;overflow:hidden;
+    background-image:linear-gradient(180deg,var(--tint-1),transparent 30%),linear-gradient(160deg,var(--tint-2),transparent 50%);
+  }
+
+  /* ---- params grid ---- */
+  .params{display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:.88rem}
+  .params .k{color:var(--muted);font-family:'Share Tech Mono';letter-spacing:.08em}
+  .params .v{color:var(--fg);font-weight:600;text-align:right}
+
+  /* ---- 狀態色：三色模式下 good=中性實色 / warn=紅字 / danger=紅底區塊 ---- */
+  .good{color:var(--good);font-weight:700}
+  .warn{color:var(--warn);font-weight:700}
+  .danger{
+    color:var(--danger);font-weight:700;
+    background:var(--danger-soft);border-left:3px solid var(--danger);
+    padding:6px 10px;border-radius:0 6px 6px 0;
+  }
+
+  /* ---- tables ---- */
+  table{width:100%;border-collapse:collapse;font-size:.84rem;margin:10px 0}
+  th{
+    background:var(--panel-2);color:var(--accent);
+    padding:8px 10px;text-align:left;font-weight:600;font-size:.74rem;
+    font-family:'Share Tech Mono';letter-spacing:.14em;text-transform:uppercase;
+    border-bottom:1px var(--bd-style) var(--line);
+  }
+  td{
+    padding:7px 10px;border-bottom:1px solid var(--table-line);
+    vertical-align:top;color:var(--fg);
+  }
+
+  /* ---- steps ---- */
+  .step{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--table-line)}
+  .step:last-child{border-bottom:none}
+  .step-num{
+    background:var(--chip-bg);border:var(--bd-w) var(--bd-style) var(--line);
+    color:var(--accent);width:22px;height:22px;border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Share Tech Mono';font-size:.72rem;font-weight:700;
+    flex-shrink:0;box-shadow:0 0 10px var(--chip-glow);
+  }
+  .step-body{flex:1;font-size:.86rem}
+
+  /* ---- tips ---- */
+  .tip{
+    background:var(--panel-3);border-left:3px solid var(--warn);
+    padding:9px 12px;margin:10px 0;border-radius:0 8px 8px 0;font-size:.82rem;
+    border-top:var(--bd-w) var(--bd-style) var(--line);
+    border-right:var(--bd-w) var(--bd-style) var(--line);
+    border-bottom:var(--bd-w) var(--bd-style) var(--line);
+  }
+  .tip .lbl{color:var(--warn);font-weight:700;margin-right:6px}
+
+  /* ---- tags ---- */
+  .tag{
+    display:inline-block;background:var(--chip-bg);border:var(--bd-w) var(--bd-style) var(--chip-bd);
+    color:var(--accent);font-size:.68rem;padding:2px 7px;border-radius:4px;
+    margin-right:4px;font-weight:600;font-family:'Share Tech Mono';letter-spacing:.06em;
+  }
+
+  hr{border:none;border-top:1px solid var(--line);margin:18px 0}
+
+  /* ---- flow diagram ---- */
+  .flow{
+    background:var(--panel-3);border:var(--bd-w) var(--bd-style) var(--line);
+    border-radius:10px;padding:14px;
+    font-family:'Share Tech Mono','JetBrains Mono',monospace;
+    font-size:.74rem;line-height:1.95;color:var(--muted);
+    overflow-x:auto;white-space:pre;
+  }
+  .flow .hl{color:var(--accent);font-weight:700}
+  .flow .hl2{color:var(--fg);font-weight:700}
+  .flow .dim{color:var(--dim)}
+
+  /* ============================================================
+     BOTTOM TAB BAR — index.html tab design
+     ============================================================ */
+  .tab-bar{
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--tabbar-bg);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);
+    display:flex;justify-content:space-around;gap:8px;
+    padding:9px 10px;padding-bottom:max(9px,env(safe-area-inset-bottom));
+    z-index:100;
+  }
+  .tab-btn{
+    position:relative;flex:1;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);
+    color:var(--muted);padding:9px 6px;
+    cursor:pointer;transition:all .26s ease;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    max-width:170px;font-family:'Chakra Petch';
+    overflow:hidden;
+    background-image:linear-gradient(160deg,var(--tab-tint),transparent 60%);
+  }
+  .tab-btn::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;
+    background:var(--hover-fx)}
+  .tab-btn:hover::after{opacity:1}
+  .tab-btn .icon{font-size:1.3rem;line-height:1;filter:drop-shadow(0 0 6px var(--icon-glow));transition:transform .3s}
+  .tab-btn .t{font-family:'Anton';text-transform:uppercase;letter-spacing:.05em;font-size:13px;line-height:1.1;position:relative;z-index:2}
+  .tab-btn .n{font-family:'Share Tech Mono';font-size:8.5px;letter-spacing:.18em;color:var(--idx);text-transform:uppercase;opacity:.9}
+  .tab-btn .corner{position:absolute;width:9px;height:9px;border:1px solid var(--accent);border-top:none;border-left:none;bottom:5px;right:5px;opacity:var(--corner-op);transition:opacity .26s}
+  .tab-btn .corner::before{content:"";position:absolute;width:5px;height:1px;background:var(--accent);right:0;bottom:-3px}
+  .tab-btn:hover .icon{transform:translateY(-2px)}
+  .tab-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  .tab-btn.active{
+    border:var(--bd-w) var(--bd-style) var(--accent);
+    background:var(--tab-active-bg);
+    box-shadow:0 0 0 1px var(--accent),0 0 26px var(--tab-active-glow),0 12px 26px var(--shadow-2);
+  }
+  .tab-btn.active .corner{opacity:1}
+  .tab-btn.active .n{color:var(--accent)}
+  /* 頂部識別條 — 實線 / 虛線 / 雙線 / 點線 */
+  .tab-btn.active::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:3px;z-index:3;
+    background:var(--bar-fx);
+  }
+  /* per-panel accent on active tab */
+  .tab-btn.active{--accent:var(--accent-gr);--bar-fx:var(--accent-gr);--bd-style:solid;--bd-w:1px}
+  .tab-btn.tab-mos2.active{--accent:var(--accent-mos2);--bar-fx:var(--accent-mos2)}
+  .tab-btn.tab-pl.active{--accent:var(--accent-pl);--bar-fx:var(--accent-pl)}
+  .tab-btn.tab-h2.active{--accent:var(--accent-h2);--bar-fx:var(--accent-h2)}
+  .tab-btn.tab-ar.active{--accent:var(--accent-ar);--bar-fx:var(--accent-ar)}
+  .tab-btn.tab-cvd.active{--accent:var(--accent-gr);--bar-fx:var(--accent-gr)}
+  html[data-theme="mono"]  .tab-btn.tab-mos2.active,
+  html[data-theme="light"] .tab-btn.tab-mos2.active,
+  html[data-theme="dark"]  .tab-btn.tab-mos2.active{
+    --bd-style:dashed; --bd-w:1px;
+    --bar-fx:repeating-linear-gradient(90deg,var(--accent) 0 5px,transparent 5px 10px);
+  }
+  html[data-theme="mono"]  .tab-btn.tab-pl.active,
+  html[data-theme="light"] .tab-btn.tab-pl.active,
+  html[data-theme="dark"]  .tab-btn.tab-pl.active{
+    --bd-style:double; --bd-w:3px;
+    --bar-fx:linear-gradient(90deg,var(--accent) 0 34%,transparent 34% 66%,var(--accent) 66% 100%);
+  }
+  html[data-theme="mono"]  .tab-btn.tab-h2.active,
+  html[data-theme="light"] .tab-btn.tab-h2.active,
+  html[data-theme="dark"]  .tab-btn.tab-h2.active,
+  html[data-theme="mono"]  .tab-btn.tab-ar.active,
+  html[data-theme="light"] .tab-btn.tab-ar.active,
+  html[data-theme="dark"]  .tab-btn.tab-ar.active{
+    --bd-style:dotted; --bd-w:2px;
+    --bar-fx:repeating-linear-gradient(90deg,var(--accent) 0 3px,transparent 3px 8px);
+  }
+
+  /* ---- responsive ---- */
+  @media(max-width:640px){
+    .vstrip{display:none}
+    .scanlines{opacity:.22}
+    .wrap{padding-top:14px}
+    .tab-bar{gap:5px;padding-left:6px;padding-right:6px}
+    .tab-btn{padding:8px 4px;gap:2px}
+    .tab-btn .t{font-size:11px}
+    .tab-btn .n{font-size:7.5px;letter-spacing:.1em}
+    .thm{font-size:9px}
+  }
+  @media(max-width:380px){
+    .tab-btn .n{display:none}
+    .tab-btn .t{font-size:10px}
+    .tab-btn .icon{font-size:1.1rem}
+  }
+
+  /* ============================================================
+     VIEWPORT MODE — desktop / mobile auto-detect + manual toggle
+     ============================================================ */
+
+  /* ---- mode toggle bar (fixed top-right, below ticker) ---- */
+  .vp-toggle{
+    position:fixed;top:34px;right:clamp(52px,5vw,68px);z-index:80;
+    display:flex;align-items:center;gap:8px;
+    font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel-2);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    border:1px solid var(--line);border-radius:8px;
+    padding:5px 10px;color:var(--muted);
+    transition:border-color .22s,opacity .22s;
+    user-select:none;
+  }
+  .vp-toggle:hover{border-color:var(--accent)}
+  .vp-toggle .vp-label{white-space:nowrap}
+  .vp-toggle .vp-indicator{
+    display:inline-flex;align-items:center;gap:4px;
+    color:var(--accent);font-weight:700;
+  }
+  .vp-toggle .vp-indicator::before{
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 6px var(--accent-glow);
+  }
+
+  /* pill switch */
+  .vp-switch{
+    position:relative;width:36px;height:18px;border-radius:9px;
+    background:var(--panel-3);border:1px solid var(--line);
+    cursor:pointer;transition:background .22s,border-color .22s;
+    flex-shrink:0;
+  }
+  .vp-switch:hover{border-color:var(--accent)}
+  .vp-switch::after{
+    content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;
+    background:var(--muted);transition:transform .22s,background .22s;
+  }
+  .vp-switch[data-state="desktop"]::after{
+    transform:translateX(18px);background:var(--accent);
+  }
+  .vp-switch[data-state="desktop"]{border-color:var(--accent);background:rgba(214,255,0,.08)}
+  html[data-theme="mono"]  .vp-switch[data-state="desktop"]{background:rgba(255,255,255,.08)}
+  html[data-theme="light"] .vp-switch[data-state="desktop"],
+  html[data-theme="dark"] .vp-switch[data-state="desktop"]{background:rgba(255,0,0,.08)}
+
+  .vp-mode-labels{display:flex;gap:2px;font-size:9px;letter-spacing:.1em}
+  .vp-mode-labels span{color:var(--dim);transition:color .22s}
+  .vp-mode-labels span.active{color:var(--accent);font-weight:700}
+
+  /* ---- DESKTOP layout overrides ---- */
+  html.vp-desktop .wrap{
+    max-width:920px;
+    padding-left:clamp(24px,3vw,40px);
+    padding-right:clamp(60px,6vw,80px);
+  }
+  html.vp-desktop .hero{padding:clamp(24px,5vw,40px) 0 clamp(14px,2vw,24px)}
+  html.vp-desktop .brand{font-size:clamp(42px,7vw,72px)}
+  html.vp-desktop .hero p.tag{max-width:720px;font-size:clamp(14px,1.4vw,16px)}
+
+  /* desktop card grid — two column where content allows */
+  html.vp-desktop .panel .section{max-width:none}
+  html.vp-desktop .params{grid-template-columns:1fr 1fr 1fr 1fr}
+  html.vp-desktop table{font-size:.88rem}
+  html.vp-desktop th{font-size:.78rem}
+  html.vp-desktop td{padding:8px 12px}
+
+  /* desktop tab bar — horizontal, wider pills */
+  html.vp-desktop .tab-bar{
+    gap:10px;padding:10px 16px;
+    padding-right:clamp(60px,6vw,80px);
+  }
+  html.vp-desktop .tab-btn{
+    padding:10px 14px;gap:4px;
+    flex-direction:row;max-width:220px;border-radius:12px;
+  }
+  html.vp-desktop .tab-btn .icon{font-size:1.1rem}
+  html.vp-desktop .tab-btn .t{font-size:14px}
+  html.vp-desktop .tab-btn .n{font-size:9px;letter-spacing:.14em}
+
+  /* desktop flow diagram */
+  html.vp-desktop .flow{font-size:.82rem;padding:18px 20px}
+
+  /* desktop topbar */
+  html.vp-desktop .topbar{padding:48px 0 14px;font-size:12px}
+  html.vp-desktop .thm{font-size:11px}
+
+  /* ---- MOBILE layout overrides (forced mobile on wide screen) ---- */
+  html.vp-mobile .wrap{max-width:580px}
+
+  /* ---- hide toggle on very small screens (always mobile) ---- */
+  @media(max-width:480px){
+    .vp-toggle{display:none}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .grid,.noise,.ticker-track,.logo-orb{animation:none!important}
+    .tab-btn::after{display:none!important}
+    .scanlines{opacity:.15}
+    .boot{clip-path:none!important;opacity:0!important;pointer-events:none!important;display:none!important}
+    html.switching,html.switching *{transition:none!important}
+  }
+
+  /* ===== boot overlay (short, skippable) ===== */
+  .boot{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;
+    background:var(--boot-bg);
+    transition:clip-path .6s cubic-bezier(.85,0,.15,1),opacity .5s ease;clip-path:inset(0 0 0 0)}
+  .boot{background:#fff!important;transition:none!important;clip-path:none!important}
+  .boot-grid{display:none}
+  .boot-I{font-family:'Anton',Impact,sans-serif;font-size:64px;line-height:1;color:#000;background:#fff;will-change:transform;transform-origin:50% 55%;user-select:none}
+  .boot.done{opacity:0!important}
+  .js .boot{display:flex}
+  .boot.done{clip-path:inset(0 0 100% 0);opacity:0;pointer-events:none}
+  .boot-grid{position:absolute;inset:0;background-image:linear-gradient(var(--boot-grid) 1px,transparent 1px),linear-gradient(90deg,var(--boot-grid) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000,transparent 82%);-webkit-mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000,transparent 82%)}
+  .boot-orb{width:clamp(58px,10vw,90px);height:clamp(58px,10vw,90px);margin:0 auto 16px;color:var(--accent);filter:drop-shadow(0 0 24px var(--accent-glow));animation:orbspin 2.2s linear infinite}
+  @keyframes orbspin{to{transform:rotate(360deg)}}
+  .boot-brand{font-family:'Anton';text-transform:uppercase;font-size:clamp(30px,9vw,54px);line-height:1;color:var(--accent);letter-spacing:.04em;text-shadow:0 0 34px var(--accent-glow)}
+  .boot-line{min-height:18px;font-family:'Share Tech Mono';letter-spacing:.3em;font-size:12px;color:var(--idx);text-transform:uppercase;margin-top:10px}
+  .boot-line::after{content:"▮";color:var(--accent);animation:blink .8s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .boot-bar{height:4px;border-radius:4px;overflow:hidden;background:var(--bar-bg);margin:24px auto 12px;width:100%}
+  .boot-bar i{display:block;height:100%;width:0;background:var(--bar-fill);box-shadow:0 0 16px var(--accent-glow)}
+  .boot-status{font-family:'Share Tech Mono';letter-spacing:.3em;font-size:12px;color:var(--idx);text-transform:uppercase;min-height:16px}
+  .boot-skip{position:absolute;top:16px;right:16px;background:none;border:1px solid var(--line);color:var(--idx);
+    font-family:'Share Tech Mono';font-size:10px;letter-spacing:.18em;text-transform:uppercase;padding:7px 12px;border-radius:4px;cursor:pointer;transition:.2s}
+  .boot-skip:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ============================================================
+     STEP BY STEP — iOS-style card stack navigation
+     ============================================================ */
+
+  /* ---- trigger button ---- */
+  .sbs-trigger{
+    background:var(--chip-bg);border:1px solid var(--accent);border-radius:6px;
+    color:var(--accent);font-family:'Share Tech Mono',monospace;
+    font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    padding:5px 12px;cursor:pointer;transition:.22s;
+    animation:sbsPulse 2.4s ease-in-out infinite;
+  }
+  .sbs-trigger:hover{background:var(--accent);color:var(--on-accent);animation:none}
+  @keyframes sbsPulse{0%,100%{box-shadow:0 0 0 0 var(--accent-glow)}50%{box-shadow:0 0 12px 2px var(--accent-glow)}}
+
+  /* ---- overlay ---- */
+  .sbs-overlay{
+    position:fixed;inset:0;z-index:200;
+    background:rgba(0,0,0,.55);
+    -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+    display:none;align-items:center;justify-content:center;
+  }
+  .sbs-overlay.active{display:flex}
+
+  /* ---- simulated phone frame ---- */
+  .sbs-phone{
+    width:min(400px,92vw);height:min(780px,90vh);
+    background:var(--bg);border:1px solid var(--line);border-radius:28px;
+    overflow:hidden;position:relative;
+    box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 0 4px rgba(255,255,255,.06);
+    display:flex;flex-direction:column;
+    background-image:var(--bg-fx),var(--bg-grad);
+  }
+
+  /* phone status bar (decorative) */
+  .sbs-statusbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 22px 0;font-family:'Share Tech Mono';font-size:9px;
+    letter-spacing:.14em;color:var(--dim);text-transform:uppercase;flex-shrink:0;
+  }
+  .sbs-statusbar::before{
+    content:"";width:80px;height:22px;border-radius:14px;
+    background:var(--ink);border:1px solid var(--line-soft);
+    position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  }
+  .sbs-notch{height:6px;flex-shrink:0}
+
+  /* ---- header ---- */
+  .sbs-header{
+    padding:8px 14px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;flex-shrink:0;
+    background:var(--panel-2);
+  }
+  .sbs-back{
+    background:none;border:1px solid var(--line);border-radius:6px;
+    color:var(--muted);font-family:'Share Tech Mono';font-size:10px;
+    letter-spacing:.12em;text-transform:uppercase;
+    padding:4px 8px;cursor:pointer;transition:.22s;
+  }
+  .sbs-back:hover{border-color:var(--accent);color:var(--accent)}
+  .sbs-title{
+    flex:1;font-family:'Anton';text-transform:uppercase;
+    font-size:13px;color:var(--accent);letter-spacing:.04em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .sbs-counter{
+    font-family:'Share Tech Mono';font-size:10px;
+    color:var(--muted);letter-spacing:.1em;
+  }
+
+  /* ---- mini theme switcher in SBS ---- */
+  .sbs-themes{
+    display:flex;gap:3px;padding:6px 14px;flex-shrink:0;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .sbs-themes .thm-b{padding:3px 7px;font-size:8px;letter-spacing:.12em}
+
+  /* ---- card viewport ---- */
+  .sbs-viewport{
+    flex:1;position:relative;overflow:hidden;
+  }
+
+  /* ---- individual step card ---- */
+  .sbs-card{
+    position:absolute;inset:0;
+    padding:22px 20px 30px;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    background:var(--bg);
+    will-change:transform,opacity;
+    border-left:1px solid var(--line-soft);
+    box-shadow:-6px 0 30px var(--shadow-2);
+  }
+  .sbs-card[data-state="current"]{transform:translateX(0) scale(1);opacity:1;z-index:10}
+  .sbs-card[data-state="prev"]{transform:translateX(-26%) scale(0.92);opacity:.35;z-index:5;pointer-events:none}
+  .sbs-card[data-state="prev-2"]{transform:translateX(-44%) scale(0.86);opacity:.15;z-index:3;pointer-events:none}
+  .sbs-card[data-state="hidden-right"]{transform:translateX(105%);opacity:0;z-index:0;pointer-events:none}
+  .sbs-card[data-state="hidden-left"]{transform:translateX(-65%) scale(0.80);opacity:0;z-index:0;pointer-events:none}
+
+  /* iOS-style card animations */
+  .sbs-card.anim-push-in{animation:sbsPushIn .36s cubic-bezier(.32,.72,.37,1.0) forwards}
+  .sbs-card.anim-push-back{animation:sbsPushBack .36s cubic-bezier(.32,.72,.37,1.0) forwards}
+  .sbs-card.anim-pop-out{animation:sbsPopOut .32s cubic-bezier(.32,.72,.37,1.0) forwards}
+  .sbs-card.anim-pop-fwd{animation:sbsPopFwd .32s cubic-bezier(.32,.72,.37,1.0) forwards}
+  .sbs-card.anim-stack-shrink{animation:sbsStackShrink .36s cubic-bezier(.32,.72,.37,1.0) forwards}
+  .sbs-card.anim-stack-grow{animation:sbsStackGrow .32s cubic-bezier(.32,.72,.37,1.0) forwards}
+
+  @keyframes sbsPushIn{from{transform:translateX(105%);opacity:.6}to{transform:translateX(0) scale(1);opacity:1}}
+  @keyframes sbsPushBack{from{transform:translateX(0) scale(1);opacity:1}to{transform:translateX(-26%) scale(0.92);opacity:.35}}
+  @keyframes sbsPopOut{from{transform:translateX(0) scale(1);opacity:1}to{transform:translateX(105%);opacity:0}}
+  @keyframes sbsPopFwd{from{transform:translateX(-26%) scale(0.92);opacity:.35}to{transform:translateX(0) scale(1);opacity:1}}
+  @keyframes sbsStackShrink{from{transform:translateX(-26%) scale(0.92);opacity:.35}to{transform:translateX(-44%) scale(0.86);opacity:.15}}
+  @keyframes sbsStackGrow{from{transform:translateX(-44%) scale(0.86);opacity:.15}to{transform:translateX(-26%) scale(0.92);opacity:.35}}
+
+  /* ---- card content styling ---- */
+  .sbs-card .sbs-sec{
+    font-family:'Share Tech Mono';font-size:10px;
+    letter-spacing:.2em;text-transform:uppercase;
+    color:var(--idx);margin-bottom:6px;
+    padding-bottom:6px;border-bottom:1px solid var(--line-soft);
+  }
+  .sbs-card .sbs-num{
+    font-family:'Anton';font-size:56px;
+    color:var(--accent);opacity:.12;line-height:1;margin-bottom:2px;
+  }
+  .sbs-card .sbs-body{
+    font-size:.94rem;line-height:1.75;color:var(--fg);
+  }
+  .sbs-card .sbs-body b{color:var(--accent)}
+  .sbs-card .sbs-body .params{font-size:.86rem}
+  .sbs-card .sbs-body table{font-size:.82rem}
+  .sbs-card .sbs-body .tip{margin:10px 0}
+  .sbs-card .sbs-body .danger{margin:10px 0}
+
+  /* ---- bottom navigation ---- */
+  .sbs-nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px;border-top:1px solid var(--line);
+    flex-shrink:0;background:var(--panel-2);
+  }
+  .sbs-nav-btn{
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    color:var(--muted);font-family:'Chakra Petch';font-size:12px;
+    font-weight:600;letter-spacing:.04em;
+    padding:8px 14px;cursor:pointer;
+    display:flex;align-items:center;gap:5px;transition:.22s;
+    min-width:86px;justify-content:center;
+  }
+  .sbs-nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .sbs-nav-btn:disabled{opacity:.25;pointer-events:none}
+  .sbs-nav-btn .arrow{font-size:18px;font-weight:700}
+  .sbs-progress{text-align:center}
+  .sbs-progress-text{
+    font-family:'Share Tech Mono';font-size:10px;
+    color:var(--muted);letter-spacing:.12em;display:block;
+  }
+  .sbs-progress-bar{
+    width:60px;height:3px;border-radius:2px;
+    background:var(--bar-bg);margin:5px auto 0;overflow:hidden;
+  }
+  .sbs-progress-bar i{display:block;height:100%;background:var(--accent);transition:width .32s ease}
+
+  /* home indicator */
+  .sbs-home-ind{
+    height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .sbs-home-ind::after{
+    content:"";width:100px;height:4px;border-radius:3px;background:var(--line);
+  }
+
+  /* ---- fullscreen on small screens ---- */
+  @media(max-width:460px){
+    .sbs-phone{width:100vw;height:100vh;border-radius:0;border:none;box-shadow:none}
+    .sbs-statusbar::before{display:none}
+  }
+</style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="grid"></div>
+  <div class="noise"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <div class="vstrip"><span>lab·sop</span></div>
+
+  <!-- boot -->
+  <div class="boot" id="boot" aria-hidden="true">
+    <div class="boot-grid"></div>
+    <div class="boot-I" id="bootI">I</div>
+    <button class="boot-skip" id="bootSkip" tabindex="0">SKIP ▸</button>
+  </div>
+
+  <div class="wrap">
+
+    <div class="ticker" aria-hidden="true"><div class="ticker-track" id="tickTrack"></div></div>
+
+    <!-- viewport mode toggle -->
+    <div class="vp-toggle" id="vpToggle">
+      <span class="vp-label">VIEW</span>
+      <div class="vp-mode-labels">
+        <span id="vpLabelMobile">📱</span>
+        <span id="vpLabelDesktop">🖥</span>
+      </div>
+      <div class="vp-switch" id="vpSwitch" data-state="mobile" role="switch" aria-checked="false" aria-label="Toggle desktop/mobile view" tabindex="0"></div>
+      <span class="vp-indicator" id="vpIndicator">AUTO</span>
+    </div>
+
+    <div class="topbar">
+      <div class="left">
+        <span class="pulse"></span>
+        <span>LAB//SOP SYSTEM</span>
+      </div>
+      <div class="right">
+        <button class="sbs-trigger" id="sbsTrigger">▶ STEP BY STEP</button>
+        <span style="opacity:.4">|</span>
+        <span>CHANNEL</span><b>SECURE</b>
+        <span style="opacity:.4">|</span>
+        <span>Z-26</span>
+      </div>
+    </div>
+
+    <div class="thm" role="group" aria-label="Colour mode">
+      <span class="thm-l">Mode</span>
+      <button type="button" class="thm-b" data-theme="mono" aria-pressed="true">Mono</button>
+      <button type="button" class="thm-b" data-theme="ultra" aria-pressed="false">Ultra</button>
+      <button type="button" class="thm-b" data-theme="light" aria-pressed="false">White</button>
+      <button type="button" class="thm-b" data-theme="dark" aria-pressed="false">Black</button>
+      <span class="thm-l" style="opacity:.5">[T]</span>
+      <span class="thm-l" style="opacity:.5">[V] view</span>
+    </div>
+
+    <header class="hero">
+      <div class="eyebrow">// PROCEDURE REFERENCE · CYBER LAB //</div>
+      <h1 class="brand">
+        <svg class="logo-orb" viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="16"/>
+          <rect class="orb-cut" x="44" y="82" width="12" height="16"/>
+        </svg>
+        <span class="word">LAB<em>SOP</em></span>
+      </h1>
+      <div class="brand-strip">
+        <span class="sub">Graphene · MoS₂ · Spectra · H₂</span>
+        <span class="div"></span>
+        <span class="num">SYS/4-PANEL</span>
+      </div>
+      <p class="tag">實驗室標準操作程序。下方選取任一節點跳到對應流程 — 內容與原始 SOP 完全一致，僅更新為 RKrint cyber 風格介面。</p>
+    </header>
+
+<!-- ═══════════════ PANEL 1: GR ═══════════════ -->
+<div class="panel panel-gr active" id="panel-gr">
+
+<h1>🔬 GR 石墨烯製備 SOP</h1>
+
+<!-- ===== 1: PMMA ===== -->
+<div class="section">
+<h2><span class="bar"></span>一、PMMA 溶液配製<span class="idx">SEC 01</span></h2>
+<div class="card">
+  <div class="params">
+    <div class="k">PMMA</div><div class="v">0.2 g</div>
+    <div class="k">溶劑</div><div class="v">丙酮 10 mL</div>
+    <div class="k">攪拌</div><div class="v">500 rpm / 8 hr</div>
+  </div>
+  <div style="margin-top:6px;font-size:.8rem;color:var(--muted)">濃度約 2% (w/v)，用於 GR 轉印支撐層</div>
+</div>
+</div>
+
+<!-- ===== 2: CU PREP ===== -->
+<div class="section">
+<h2><span class="bar"></span>二、銅片準備<span class="idx">SEC 02</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">CU 片裁切 <b>1×1 cm</b>，一次 <b>4 片</b></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body"><b>HCl</b> 清洗 <b>3 min</b></div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">照 <b>紅→黃</b> 順序清洗，各 <b>3 min</b>（一次）</div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">氮氣槍 <b>吹乾</b></div></div>
+</div>
+</div>
+
+<!-- ===== 3: CAMPHOR ===== -->
+<div class="section">
+<h2><span class="bar"></span>三、樟腦秤重<span class="idx">SEC 03</span></h2>
+<div class="card">
+  <div class="params">
+    <div class="k">秤重</div><div class="v">1.22 mg</div>
+  </div>
+  <div class="warn" style="margin-top:8px">⚠ CU 吹乾後再量 — 樟腦會揮發</div>
+</div>
+</div>
+
+<!-- ===== 4: EQUIPMENT CHECK ===== -->
+<div class="section">
+<h2><span class="bar"></span>四、設備開機檢查<span class="idx">SEC 04</span></h2>
+<div class="card">
+  <h3>水冷</h3>
+  <div class="good">✓ 確認水冷機已開啟</div>
+
+  <h3>氣體閥門</h3>
+  <table>
+    <tr><th>閥門</th><th>操作</th></tr>
+    <tr><td>Ar 鋼瓶</td><td>逆時針轉開</td></tr>
+    <tr><td>加壓閥</td><td>順時針轉一點加壓</td></tr>
+    <tr><td>中心閥</td><td>逆時針轉開（確認暢通）</td></tr>
+    <tr><td>N₂</td><td><span class="good">✓ 確保打開</span></td></tr>
+  </table>
+
+  <h3>H₂ 氫氣純化器</h3>
+  <div style="font-size:.82rem;color:var(--warn);margin-bottom:8px">⚠ 如果這台沒開（冷開機）：</div>
+  <div class="step"><div class="step-num">1</div><div class="step-body">打開純化器<b>下方兩個開關</b></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">轉<b>上面兩個旋鈕</b>到 OPEN</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">等待升溫到 <b>420°C</b></div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">420°C 後：轉開機器上方<b>黑色 H₂ 閥門</b></div></div>
+  <div class="step"><div class="step-num">5</div><div class="step-body">轉開<b>H₂ 鋼瓶閥門 + 加壓</b>（鬆→緊→鬆）</div></div>
+  <div style="font-size:.78rem;color:var(--muted);margin:4px 0 4px 34px">※ 關閉順序：緊→鬆→緊</div>
+  <div class="step"><div class="step-num">6</div><div class="step-body">回到純化器四個主要旋鈕：</div></div>
+  <div style="margin-left:34px;font-size:.82rem">
+    <div style="margin:2px 0">① 左上角 → <b>先關閉</b></div>
+    <div style="margin:2px 0">② 左下角 → <b>打開</b></div>
+    <div style="margin:2px 0">③ 轉<b>上面紅色珠珠的旋鈕</b>，讓他跑到<b>紅色那條線</b></div>
+    <div style="margin:2px 0">④ 等 <b>Pure H₂ 跑到接近 0.5</b></div>
+    <div style="margin:2px 0">⑤ 打開<b>右下旋鈕</b> → 有 H₂ 了 ✓</div>
+  </div>
+</div>
+</div>
+
+<!-- ===== 5: VACUUM ===== -->
+<div class="section">
+<h2><span class="bar"></span>五、抽真空<span class="idx">SEC 05</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">關閉輸入氣體 <b>以及左側閥門</b></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">打開開關</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">轉到最大後 <b>回半圈</b></div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">抽到氣壓計顯示 <b>2.0×10⁻² 或更低</b></div></div>
+  <div class="step"><div class="step-num">5</div><div class="step-body">轉回去</div></div>
+  <div class="step"><div class="step-num">6</div><div class="step-body">關閉開關</div></div>
+  <div class="step"><div class="step-num">7</div><div class="step-body"><b>灌 Ar</b> 到左邊氣壓計回 <b>0</b>（內部回復 1 atm）</div></div>
+  <div class="step"><div class="step-num">8</div><div class="step-body"><b>開啟左側閥門</b></div></div>
+</div>
+</div>
+
+<!-- ===== 6: FURNACE PROGRAM ===== -->
+<div class="section">
+<h2><span class="bar"></span>六、爐管程式設定<span class="idx">SEC 06</span></h2>
+<div class="card">
+  <div style="font-size:.8rem;color:var(--muted);margin-bottom:8px">Prg0 → 1（長按左鍵進入設定）</div>
+  <table>
+    <tr><th>參數</th><th>設定值</th></tr>
+    <tr><td>SSP</td><td>20</td></tr>
+    <tr><td>SP1</td><td>980</td></tr>
+    <tr><td>TIME1</td><td>1.00</td></tr>
+    <tr><td>SP2</td><td>980</td></tr>
+    <tr><td>TIME2</td><td>0.20</td></tr>
+    <tr><td>SP3</td><td>950</td></tr>
+    <tr><td>TIME3</td><td>0.10</td></tr>
+    <tr><td>SP4</td><td>950</td></tr>
+    <tr><td>TIME4</td><td>0.10</td></tr>
+    <tr><td>SP5</td><td>500</td></tr>
+    <tr><td>TIME5</td><td>OFF</td></tr>
+  </table>
+  <div style="margin-top:10px;font-size:.82rem">
+    <span class="good">長按左鍵確認</span> → 待機 → <span class="good">長按 RUN 啟動</span>
+  </div>
+</div>
+</div>
+
+<!-- ===== 7: GAS & SAMPLE ===== -->
+<div class="section">
+<h2><span class="bar"></span>七、通氣與放入樣品<span class="idx">SEC 07</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">開啟 Ar（下閥），流量 <b>200</b></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">等氣壓計回到 <b>0（1 atm）</b> → 可打開爐管</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">放入樣品</div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">長按 <b>RUN</b> 開始跑程式</div></div>
+</div>
+</div>
+
+<!-- ===== 8: GROWTH STAGES ===== -->
+<div class="section">
+<h2><span class="bar"></span>八、生長參數總表<span class="idx">SEC 08</span></h2>
+<div class="card">
+  <table>
+    <tr><th>Stage</th><th>時間</th><th>溫度</th><th>Ar</th><th>H₂</th><th>備註</th></tr>
+    <tr><td>1</td><td>60 min</td><td>980°C</td><td>200</td><td>—</td><td>—</td></tr>
+    <tr><td>2</td><td>20 min</td><td>980°C</td><td>—</td><td>100</td><td>—</td></tr>
+    <tr><td>3</td><td>10 min</td><td>950°C</td><td>98</td><td>8</td><td>—</td></tr>
+    <tr><td>4</td><td>10 min</td><td>950°C</td><td>98</td><td>8</td><td><span class="tag" style="color:var(--accent-gr)">🔥加熱</span> 氣體加熱 ON<br>樟腦加熱 ON</td></tr>
+    <tr><td>5</td><td>放涼</td><td>—</td><td>98</td><td>8</td><td>氣體加熱 OFF<br>樟腦加熱 OFF</td></tr>
+  </table>
+</div>
+</div>
+
+<!-- ===== 9: POST COOLING ===== -->
+<div class="section">
+<h2><span class="bar"></span>九、放涼後取出<span class="idx">SEC 09</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">關閉 Ar、H₂ 氣體</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">關閉左邊開關</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">抽真空到 <b>2×10⁻²</b></div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">通 <b>N₂</b>，慢慢調大流量</div></div>
+  <div class="step"><div class="step-num">5</div><div class="step-body">持續通 N₂ 直到<b>左邊氣壓計歸零</b></div></div>
+  <div class="step"><div class="step-num">6</div><div class="step-body">等待溫度降至<b>適合取出</b></div></div>
+  <div class="step"><div class="step-num">7</div><div class="step-body">關閉左邊通外面的閥門</div></div>
+</div>
+</div>
+
+<!-- ===== 10: CU REMOVAL ===== -->
+<div class="section">
+<h2><span class="bar"></span>十、GR 去銅（APS 蝕刻）<span class="idx">SEC 10</span></h2>
+<div class="card">
+  <h3>蝕刻液配製</h3>
+  <div class="params">
+    <div class="k">(NH₄)₂S₂O₈</div><div class="v">6 g</div>
+    <div class="k">DI Water</div><div class="v">70 mL</div>
+    <div class="k">攪拌</div><div class="v">~300–500 rpm</div>
+  </div>
+  <h3>蝕刻與清洗</h3>
+  <div class="step"><div class="step-num">1</div><div class="step-body">GR/Cu 樣品丟入蝕刻液中</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">靜置 <b>約 5 hr</b>，Cu 完全溶解</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">用目標基板<b>從下方撈起</b> GR/PMMA 膜</div></div>
+  <h3>清洗順序</h3>
+  <table>
+    <tr><th>步驟</th><th>溶液</th><th>時間</th></tr>
+    <tr><td>1</td><td>紅水</td><td>1 hr</td></tr>
+    <tr><td>2</td><td>黃水</td><td>1 hr</td></tr>
+    <tr><td>3</td><td>DIW</td><td>1 hr</td></tr>
+  </table>
+  <div class="danger" style="margin-top:10px">⚠ 去 PMMA 時切勿使用超音波震盪！</div>
+</div>
+</div>
+
+<!-- ===== 11: PMMA REMOVAL ===== -->
+<div class="section">
+<h2><span class="bar"></span>十一、去 PMMA<span class="idx">SEC 11</span></h2>
+<div class="card">
+  <div class="danger">⚠ 禁止超音波</div>
+  <div style="margin-top:6px;color:var(--muted)">（自然溶解 / 熱丙酮等方式，依實驗室 SOP）</div>
+</div>
+</div>
+
+<!-- ===== 12: MEASUREMENT ===== -->
+<div class="section">
+<h2><span class="bar"></span>十二、後續量測<span class="idx">SEC 12</span></h2>
+<div class="card">
+  <div class="params">
+    <div class="k">IV 曲線</div><div class="v">☑</div>
+    <div class="k">GR Raman</div><div class="v">☑</div>
+  </div>
+</div>
+</div>
+
+<!-- FLOW -->
+<hr>
+<h2><span class="bar"></span>📋 完整流程總覽<span class="idx">FLOW</span></h2>
+<div class="flow">
+<span class="dim">┌─ 準備 ──────────────────────────┐</span>
+PMMA <span class="dim">(0.2g+10mL丙酮, 500rpm 8h)</span>
+CU 裁切 <span class="hl2">1×1cm</span> → HCl → 紅黃水 → 吹乾
+樟腦秤重 <span class="hl2">1.22mg</span> <span class="dim">(CU吹乾後)</span>
+<span class="dim">└────────────────────────────────┘</span>
+              ↓
+<span class="dim">┌─ CVD 生長 ───────────────────────┐</span>
+開水冷 → 開氣體閥 → 抽真空 <span class="dim">(2.0×10⁻²)</span>
+Prg0→1 設定 → 通 Ar<span class="hl2">200</span> → 放樣品 → RUN
+  <span class="hl">Stage1</span> <span class="dim">60min / 980°C / Ar200</span>
+→ <span class="hl">Stage2</span> <span class="dim">20min / 980°C / H₂100</span>
+→ <span class="hl">Stage3</span> <span class="dim">10min / 950°C / Ar98+H₂8</span>
+→ <span class="hl">Stage4</span> <span class="dim">10min / 950°C / Ar98+H₂8 + </span><span class="hl2">🔥樟腦</span>
+→ <span class="hl">Stage5</span> <span class="dim">降溫 / Ar98+H₂8 / 自然冷卻</span>
+<span class="dim">└────────────────────────────────┘</span>
+              ↓
+<span class="dim">┌─ 放涼取出 ───────────────────────┐</span>
+關氣體 → 關左開關 → 抽真空<span class="dim">(2×10⁻²)</span>
+→ 通 N₂ <span class="dim">至氣壓計歸零</span> → 降溫 → 取出
+→ 關通外閥門
+<span class="dim">└────────────────────────────────┘</span>
+              ↓
+<span class="dim">┌─ 去銅 ───────────────────────────┐</span>
+APS 蝕刻液 <span class="dim">(6g+70mL)</span>
+Cu 溶解 <span class="hl2">~5h</span> → 撈膜
+→ 紅水 / 黃水 / DIW <span class="dim">各 1h</span>
+<span class="dim">└────────────────────────────────┘</span>
+              ↓
+<span class="dim">┌─ 去 PMMA ─────────────────────────┐</span>
+<span class="hl2">⚠ 勿超音波</span>
+<span class="dim">└────────────────────────────────┘</span>
+              ↓
+       <span class="hl">IV / Raman 量測</span>
+</div>
+
+</div><!-- /panel-gr -->
+
+<!-- ═══════════════ PANEL 2: MoS₂ ═══════════════ -->
+<div class="panel panel-mos2" id="panel-mos2">
+
+<h1>🧪 MoS₂ QDs 合成 SOP</h1>
+<div class="subtitle">水熱法合成 MoS₂ 量子點 · 中原大學 電子三甲</div>
+
+<div class="section">
+<h2><span class="bar"></span>開機準備<span class="idx">PRE</span></h2>
+<div class="card">
+  <div class="tip"><span class="lbl">🔥</span>烤箱需先<b>預熱至 200°C，維持 1 小時</b></div>
+</div>
+</div>
+
+<!-- ===== 1 ===== -->
+<div class="section">
+<h2><span class="bar"></span>一、配製溶液<span class="idx">SEC 01</span></h2>
+<div class="card">
+  <h3>鉬源溶液 <span style="font-weight:400;font-size:.8rem;color:var(--muted)">(NH₄)₂MoS₄（白蓋子）</span></h3>
+  <div class="params">
+    <div class="k">用量</div><div class="v">65 mg</div>
+    <div class="k">溶劑</div><div class="v">超純水 25 mL</div>
+    <div class="k">震盪</div><div class="v">超音波 10 min</div>
+  </div>
+  <div style="font-size:.8rem;color:var(--muted);margin-bottom:12px">震到固體完全溶解；10min 不夠、有沉澱 → 再加 10min</div>
+  <h3>硫源溶液 <span style="font-weight:400;font-size:.8rem;color:var(--muted)">GSH（紅蓋子）</span></h3>
+  <div class="params">
+    <div class="k">用量</div><div class="v">308 mg (0.308g)</div>
+    <div class="k">溶劑</div><div class="v">超純水 50 mL</div>
+  </div>
+  <div style="font-size:.8rem;color:var(--muted)">GSH 此時是透明的</div>
+</div>
+</div>
+
+<!-- ===== 2 ===== -->
+<div class="section">
+<h2><span class="bar"></span>二、配製 0.1M HCl<span class="idx">SEC 02</span></h2>
+<div class="card">
+  <div class="params">
+    <div class="k">來源</div><div class="v">藥品櫃 12M HCl</div>
+    <div class="k">配方</div><div class="v">1mL 12M HCl + 119mL H₂O</div>
+  </div>
+  <div style="margin-top:8px;font-size:.84rem">
+    <div class="step"><div class="step-num">1</div><div class="step-body">拉低通風櫥窗戶</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body">用小量筒量 <b>1mL</b> 12M HCl</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body">倒入小燒杯，用吸管吸到小量筒</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body">加入 <b>119mL</b> H₂O（用量筒量）</div></div>
+  </div>
+  <div class="tip"><span class="lbl">⚠</span>HCl 有蓋子，用完要記得蓋回去。弄完可以洗手。</div>
+</div>
+</div>
+
+<!-- ===== 3 ===== -->
+<div class="section">
+<h2><span class="bar"></span>三、調節 pH 值<span class="idx">SEC 03</span></h2>
+<div class="card">
+  <div style="font-size:.84rem;margin-bottom:8px">目標：<b>pH 6.5</b>（正常是 >7，加酸會變小）</div>
+  <div class="step"><div class="step-num">1</div><div class="step-body">取出 pH 計，架子在隔壁桌上</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">調整高度到適當位置（字會跳，用架子較穩定）</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">慢慢滴入 0.1M HCl 調整</div></div>
+  <div class="tip"><span class="lbl">💡</span>pH 計不準時 → 加 <b>五六滴鹽酸</b>；搖晃燒杯攪拌均勻</div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">用完 pH 計清洗後放回</div></div>
+</div>
+</div>
+
+<!-- ===== 4 ===== -->
+<div class="section">
+<h2><span class="bar"></span>四、混合與二次震盪<span class="idx">SEC 04</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">GSH 溶液加入 (NH₄)₂MoS₄ 溶液中</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">混合液放入超音波震盪 <b>10 min</b></div></div>
+</div>
+</div>
+
+<!-- ===== 5 ===== -->
+<div class="section">
+<h2><span class="bar"></span>五、水熱反應<span class="idx">SEC 05</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">拿<b>上面有 MoS₂ 字</b>的高壓釜</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">高壓釜用 HCl 清洗（可一起超音波更好）</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">混合液轉移至<b>白色特氟龍內襯</b>中</div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">鎖上蓋子：確保打得開、<b>不要超緊</b>、上面平整</div></div>
+  <div class="step"><div class="step-num">5</div><div class="step-body">拿去<b>樓下烤箱（153 room）</b>，200°C / 24hr</div></div>
+  <div class="tip"><span class="lbl">⚠</span>有用化學液體要寫記錄（拿出來的）</div>
+  <div class="tip"><span class="lbl">⚠</span>如果別人在用其他設備（電腦開著）→ 不能開烤箱</div>
+  <div class="tip"><span class="lbl">⚠</span>預約還有人用 → 找學長反應</div>
+  <div style="font-size:.82rem;margin-top:10px">
+    <span class="tag" style="color:var(--accent-mos2)">🧤</span> 烤箱手套 → 用完放回 8 樓<br>
+    <span class="tag" style="color:var(--accent-mos2)">🔑</span> 鑰匙放回 8 樓<br>
+    <span class="tag" style="color:var(--accent-mos2)">🔒</span> 出來要鎖門
+  </div>
+</div>
+</div>
+
+<!-- ===== 6 ===== -->
+<div class="section">
+<h2><span class="bar"></span>六、冷卻與取出<span class="idx">SEC 06</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">風扇吹 <b>~10 min</b>，到可用手套拿的溫度</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">拿到<b> 8 樓抽氣白色裝置區域</b>繼續放涼</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">放到可用手套<b>轉開</b>的溫度</div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">取出：<b>從下方推上去</b>，不可傾斜以免溢出</div></div>
+  <div style="font-size:.78rem;color:var(--muted);margin-top:6px">等待時可以先洗兩個燒杯</div>
+</div>
+</div>
+
+<!-- ===== 7 ===== -->
+<div class="section">
+<h2><span class="bar"></span>七、離心<span class="idx">SEC 07</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">用滴管滴到小瓶子 <b>1mL</b> 刻度處</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">放入離心機：內部要<b>放對稱位置</b></div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body"><b>10,000 rpm</b> / <b>10 min</b></div></div>
+  <div class="tip"><span class="lbl">⚠</span>離心機會越來越燙，要適時等待冷卻</div>
+</div>
+</div>
+
+<!-- ===== 8 ===== -->
+<div class="section">
+<h2><span class="bar"></span>八、吸取上清液<span class="idx">SEC 08</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">只吸<b>上面液體</b>，避免吸到下方黑色沉澱</div></div>
+  <div class="tip"><span class="lbl">💡 技巧</span>先在空氣中擠壓吸管 → 避免攪動液體導致沉澱飄起。若失敗要擠回並重新離心。</div>
+</div>
+</div>
+
+<!-- ===== 9 ===== -->
+<div class="section">
+<h2><span class="bar"></span>九、過濾<span class="idx">SEC 09</span></h2>
+<div class="card">
+  <div class="params">
+    <div class="k">濾膜</div><div class="v">0.22 μm 微孔濾膜</div>
+    <div class="k">方式</div><div class="v">濾心 + 吸筒</div>
+    <div class="k">更換</div><div class="v">離心三次換一個濾膜</div>
+  </div>
+  <div style="margin-top:6px;font-size:.8rem;color:var(--muted)">濾膜用水沖洗即可</div>
+</div>
+</div>
+
+<!-- ===== 10 ===== -->
+<div class="section">
+<h2><span class="bar"></span>十、儲存<span class="idx">SEC 10</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">成品裝入小瓶子（通常能得 <b>~2.5 瓶</b>）</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">用 <b>PET 封住瓶蓋周圍</b></div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body"><b>寫記號</b>標示</div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">用<b>鋁箔紙包住</b>（怕光）</div></div>
+  <div class="step"><div class="step-num">5</div><div class="step-body">存放：冰箱<b>右下角</b>，4°C</div></div>
+  <div class="tip"><span class="lbl">📌</span>留下 MoS₂ 黑色廢料 — 確保感測光可打在上面得知化學成分</div>
+</div>
+</div>
+
+<!-- ===== 11 ===== -->
+<div class="section">
+<h2><span class="bar"></span>十一、收拾與清潔<span class="idx">SEC 11</span></h2>
+<div class="card">
+  <table>
+    <tr><th>項目</th><th>處理</th></tr>
+    <tr><td>鹽酸</td><td>放回藥品櫃</td></tr>
+    <tr><td>GSH、(NH₄)₂MoS₄</td><td>包保護泡泡紙，放回冰箱（有順序）</td></tr>
+    <tr><td>藥勺</td><td>清洗</td></tr>
+    <tr><td>滴管</td><td>丟垃圾桶</td></tr>
+    <tr><td>燒杯</td><td>去離子水清洗 → 衛生紙擦 → 氮氣除紙屑</td></tr>
+    <tr><td>高壓釜</td><td>HCl 清洗（可超音波）</td></tr>
+    <tr><td>HCl 廢液</td><td>→ Acid 回收（Left 桶）</td></tr>
+    <tr><td>白色吸氣台</td><td>關閉（綠色 switch）</td></tr>
+  </table>
+</div>
+</div>
+
+<!-- ===== 12 ===== -->
+<div class="section">
+<h2><span class="bar"></span>十二、MoS₂ 薄膜製備<span class="idx">SEC 12</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">取一<b>矽基板</b></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">放在<b>旋轉加熱器</b>上加熱</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">直接將<b>MoS₂ 量子點黑色殘渣</b>滴上基板</div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">加熱使其形成<b>薄膜</b></div></div>
+  <div class="tip"><span class="lbl">⚠</span>溫度太高會改變 MoS₂ 結構，注意控溫</div>
+  <div class="tip"><span class="lbl">⚠</span>放入樣本盒需<b>加強固定</b> — 碰撞會導致薄膜脫落</div>
+</div>
+</div>
+
+<!-- APPENDIX -->
+<div class="section">
+<h2><span class="bar"></span>📝 秤重技巧<span class="idx">APPX</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">測量紙先放上秤</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">拿出（歸零）</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">放藥品（多的放回原瓶）</div></div>
+</div>
+</div>
+
+<div class="section">
+<h2><span class="bar"></span>🔊 超音波震盪機操作<span class="idx">APPX</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">PRESS → <b>SET</b></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">設定 <b>TIME</b>（10 min）</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">如果 10min 不夠、有沉澱 → 再 10min</div></div>
+</div>
+</div>
+
+<div class="section">
+<h2><span class="bar"></span>📍 物品位置速查<span class="idx">MAP</span></h2>
+<div class="card">
+  <table>
+    <tr><th>物品</th><th>位置</th></tr>
+    <tr><td>12M HCl</td><td>藥品櫃</td></tr>
+    <tr><td>滴管</td><td>下面抽屜</td></tr>
+    <tr><td>pH 計架子</td><td>隔壁桌上</td></tr>
+    <tr><td>高壓釜</td><td>上面有 MoS₂ 字</td></tr>
+    <tr><td>烤箱</td><td>樓下 153 room</td></tr>
+    <tr><td>烤箱手套</td><td>用完放回 8 樓</td></tr>
+    <tr><td>鑰匙</td><td>用完放回 8 樓</td></tr>
+    <tr><td>冰箱</td><td>右下角（成品）</td></tr>
+    <tr><td>Acid 回收桶</td><td>Left</td></tr>
+  </table>
+</div>
+</div>
+
+<hr>
+<h2><span class="bar"></span>📋 完整流程總覽<span class="idx">FLOW</span></h2>
+<div class="flow">
+<span class="dim">┌─ Day 1：合成 ─────────────────────┐</span>
+<span class="hl2">(NH₄)₂MoS₄</span> <span class="dim">65mg + 25mL H₂O</span> → 超音波 10min
+<span class="hl2">GSH</span> <span class="dim">308mg + 50mL H₂O（透明）</span>
+         ↓
+配製 <span class="hl2">0.1M HCl</span> <span class="dim">(1mL 12M + 119mL H₂O)</span>
+         ↓
+調 <span class="hl">pH 6.5</span> <span class="dim">（加 HCl 慢慢調，搖晃攪拌）</span>
+         ↓
+GSH + (NH₄)₂MoS₄ 混合 → 超音波 10min
+         ↓
+轉移至高壓釜 → <span class="hl">200°C / 24hr</span>
+<span class="dim">└────────────────────────────────┘</span>
+              ↓
+<span class="dim">┌─ Day 2：純化 ─────────────────────┐</span>
+風扇吹涼 10min → 8F 抽氣區繼續放涼
+         ↓
+取出 <span class="dim">（從下方推，不傾斜）</span>
+         ↓
+離心 <span class="hl2">10,000rpm / 10min</span> <span class="dim">（對稱放置）</span>
+         ↓
+吸取上清液 <span class="dim">（勿攪動沉澱）</span>
+         ↓
+過濾 <span class="dim">（0.22μm 濾膜 + 吸筒）</span>
+         ↓
+裝瓶 → PET 封口 → 標記 → 鋁箔包裝
+         ↓
+冰箱右下角 <span class="hl">4°C</span> 保存
+<span class="dim">└────────────────────────────────┘</span>
+              ↓
+       <span class="hl2">廢料保留</span> <span class="dim">（感測光分析）</span>
+</div>
+
+</div><!-- /panel-mos2 -->
+
+<!-- ═══════════════ PANEL 3: PL/Abs ═══════════════ -->
+<div class="panel panel-pl" id="panel-pl">
+
+<h1>📊 PL / Abs 光譜測量</h1>
+<div class="subtitle">HORIBA EzSpec · 物理 204</div>
+
+<!-- 開機 -->
+<div class="section">
+<h2><span class="bar"></span>開機準備<span class="idx">PRE</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">去<b>物理 204</b> 開機 + 拿<b>有 Y 的樣本</b>（門口左邊桌子抽屜）</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">開機後<b>等待 30 分鐘</b>暖機</div></div>
+  <div class="tip"><span class="lbl">💡</span>等待時先用 <b>Acetone + ISO</b> 清洗放樣本的容器，並開啟電腦。手套在櫃子左邊，滴管在櫃子右邊。</div>
+</div>
+</div>
+
+<!-- PL 參數 -->
+<div class="section">
+<h2><span class="bar"></span>PL 測量 — 發射光譜參數<span class="idx">PL</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">開啟 <b>Ezspec</b> → <b>新方法（黃色）</b> → 選<b>發射光譜</b></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">放入樣本（<b>Y 先朝自己</b>），樣品托：<b>Standard Single Cuvette Holder</b></div></div>
+
+  <table style="margin-top:10px">
+    <tr><th>參數</th><th>設定值</th></tr>
+    <tr><td>激發波長</td><td><b>300 nm</b></td></tr>
+    <tr><td>發射範圍</td><td><b>350 – 700 nm</b></td></tr>
+    <tr><td>激發端帶通</td><td><b>5 nm</b></td></tr>
+    <tr><td>發射端帶通</td><td><b>5 nm</b></td></tr>
+    <tr><td>積分時間</td><td><b>0.05 s</b></td></tr>
+    <tr><td>檢測器累積</td><td><b>1</b></td></tr>
+    <tr><td>發射端步進</td><td><b>0.5 nm</b> (1 pixel)</td></tr>
+    <tr><td>IFE 校正</td><td>未勾選</td></tr>
+    <tr><td>溶劑</td><td>N/A</td></tr>
+  </table>
+
+  <div class="step"><div class="step-num">3</div><div class="step-body">點<b>下一步</b> → 測量 Y 樣本</div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">文件 → <b>數據另存為</b></div></div>
+  <div class="tip"><span class="lbl">⚠</span>校正 IFE 時帶通值必須與測量空白時保持一致</div>
+</div>
+</div>
+
+<!-- Abs 參數 -->
+<div class="section">
+<h2><span class="bar"></span>Abs 測量 — 吸收譜參數<span class="idx">ABS</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">5</div><div class="step-body">按左上角 <b>Home</b> → 選<b>吸收譜</b></div></div>
+
+  <table style="margin-top:10px">
+    <tr><th>參數</th><th>設定值</th></tr>
+    <tr><td>掃描範圍</td><td><b>200 – 800 nm</b></td></tr>
+    <tr><td>步進</td><td><b>1 nm</b></td></tr>
+    <tr><td>積分時間</td><td><b>0.05 s</b></td></tr>
+    <tr><td>帶通</td><td><b>5 nm</b></td></tr>
+    <tr><td>模型</td><td><b>Absorbance</b></td></tr>
+    <tr><td>樣品托</td><td>Standard Single Cuvette Holder</td></tr>
+  </table>
+
+  <div class="step"><div class="step-num">6</div><div class="step-body">把 Y <b>橫過來放</b>再測量（此時仍有 MoS₂）</div></div>
+  <div class="step"><div class="step-num">7</div><div class="step-body">點<b>下一步</b>開始測量</div></div>
+  <div class="step"><div class="step-num">8</div><div class="step-body">測量完後：</div></div>
+  <div style="margin-left:34px;font-size:.84rem">
+    <div style="margin:2px 0">① 把 <b>MoS₂ 倒掉</b></div>
+    <div style="margin:2px 0">② 放樣本的容器用 <b>Acetone + ISO 再洗一次</b></div>
+    <div style="margin:2px 0">③ 洗完放回去</div>
+  </div>
+  <div class="step"><div class="step-num">9</div><div class="step-body">按<b>下一步</b>繼續測量</div></div>
+</div>
+</div>
+
+</div><!-- /panel-pl -->
+
+
+<!-- ═══════════════ PANEL 4: H₂ PURIFIER ═══════════════ -->
+<div class="panel panel-h2" id="panel-h2">
+
+<h1>💨 氫氣純化器 SOP</h1>
+<div class="subtitle">H₂ Gas Purifier · 啟動 / 關閉程序</div>
+
+<!-- 閥門對照 -->
+<div class="section">
+<h2><span class="bar"></span>閥門位置對照<span class="idx">PRE</span></h2>
+<div class="card">
+  <table>
+    <tr><th>代號</th><th>位置</th><th>名稱</th></tr>
+    <tr><td><b>V1</b></td><td>左下</td><td>FEED／H₂ 入口</td></tr>
+    <tr><td><b>V2</b></td><td>右上</td><td>BLEED</td></tr>
+    <tr><td><b>V3</b></td><td>右下</td><td>PURE H₂</td></tr>
+    <tr><td><b>V4</b></td><td>左上</td><td>INERT GAS</td></tr>
+  </table>
+  <div class="tip"><span class="lbl">⚠</span>最底下銀色開關：<b>左邊聲音模塊已損壞 — 不用開</b>；<b>右邊是主電源 — 必須開啟</b>。</div>
+</div>
+</div>
+
+<!-- ===== 啟動 ===== -->
+<div class="section">
+<h2><span class="bar"></span>▶ 啟動 氫氣純化器<span class="idx">START</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">開<b>最底下銀色開關</b>（左邊聲音模塊壞了不用開，<b>右邊是主電源要開啟</b>）</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">左上 <b>V4 (INERT GAS)</b>、右上 <b>V2 (BLEED)</b> 開啟（<b>N₂ 進入</b>）</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">等待下方標示達到 <b>420°C</b></div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">達到 420°C → 開啟儀器<b>上方黑色 H₂ 入口</b></div></div>
+  <div class="step"><div class="step-num">5</div><div class="step-body">氫氣罐 <span style="color:var(--muted)">（左：出去閥／中：加壓／右：氣瓶主閥）</span>
+    <div style="margin-top:4px">
+      <div style="margin:2px 0">① 轉<b>鬆右邊</b> → 氫氣量氣壓計<b>上升</b></div>
+      <div style="margin:2px 0">② 轉<b>緊中間</b> → 加壓計氣壓計<b>上升</b></div>
+      <div style="margin:2px 0">③ 轉<b>開左邊</b> → 氣體出去</div>
+    </div>
+  </div></div>
+  <div class="step"><div class="step-num">6</div><div class="step-body"><b>V4 左上 (INERT GAS) 關閉</b> → 打開<b>左下 V1 (FEED)</b> → 轉上面流速計（紅色／銀色珠子），確保<b>紅色珠子跑在紅線標示範圍</b></div></div>
+  <div class="step"><div class="step-num">7</div><div class="step-body">等到<b>左上氣壓計到約 0.5</b>，並打開<b>V3 右下 (PURE H₂)</b> → <span class="good">✓ 即可使用氫氣</span></div></div>
+</div>
+</div>
+
+<!-- ===== 關閉 ===== -->
+<div class="section">
+<h2><span class="bar"></span>⏹ 關閉 氫氣純化器<span class="idx">STOP</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">氫氣罐 <span style="color:var(--muted)">（左：出去閥／中：加壓／右：氣瓶主閥）</span>
+    <div style="margin-top:4px">
+      <div style="margin:2px 0">① 轉<b>緊右邊</b> → 氫氣量氣壓計<b>下降到 0</b></div>
+      <div style="margin:2px 0">② <b>中間、左邊暫時維持不變</b></div>
+    </div>
+  </div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body">關閉<b>右下 V3</b>；流速計（紅色／銀色珠子）<b>開最大</b> — 此時 H₂ 瓶加壓氣壓計<b>掉到 0</b> → 轉<b>鬆中間加壓閥</b>、轉<b>緊左邊閥門</b></div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">此時氫氣源頭已經關閉 → 關閉<b>左下 V1 (H₂ 入口)</b> 以及<b>上方黑色 H₂ 入口</b></div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">開啟<b>左上 N₂ 沖洗 H₂</b>，此時調整<b>流速計銀球到銀線</b>（此時上面兩個開啟）</div></div>
+  <div class="step"><div class="step-num">5</div><div class="step-body">關閉<b>底下銀色主開關</b></div></div>
+  <div class="step"><div class="step-num">6</div><div class="step-body"><b>等 5 分鐘</b></div></div>
+  <div class="step"><div class="step-num">7</div><div class="step-body">關閉 <b>V4 左上 N₂ 入口</b>，並調整<b>流速計銀球到最大</b> → 排出最後的 N₂，直到<b>左上氣壓計歸零</b> → 即可關閉<b>右上 V2 (BLEED)</b></div></div>
+  <div class="danger" style="margin-top:10px">⚠ 最後一步：左上氣壓計<b>歸零後</b>才可關閉右上 V2 (BLEED)</div>
+</div>
+</div>
+
+<!-- FLOW -->
+<hr>
+<h2><span class="bar"></span>📋 完整流程總覽<span class="idx">FLOW</span></h2>
+<div class="flow">
+<span class="dim">┌─ 啟動 ───────────────────────────┐</span>
+銀色開關 <span class="hl2">右(主電源) ON</span> <span class="dim">／左(聲音模塊)壞-不用開</span>
+         ↓
+V4 左上 <span class="hl">INERT GAS</span> + V2 右上 <span class="hl">BLEED</span> 開啟 <span class="dim">(N₂ 進入)</span>
+         ↓
+升溫 → 下方標示 <span class="hl">420°C</span>
+         ↓
+開啟上方 <span class="hl2">黑色 H₂ 入口</span>
+         ↓
+氫氣罐 <span class="dim">(右 氣瓶主閥 → 中 加壓 → 左 出去閥)</span>
+         ↓
+V4 INERT GAS <span class="hl2">關</span> → <span class="hl">V1 左下 FEED 開</span>
+轉流速計 <span class="dim">(紅珠落在紅線範圍)</span>
+         ↓
+左上氣壓計 <span class="hl2">≈ 0.5</span> → V3 右下 <span class="hl">PURE H₂ 開</span>
+         ↓
+       <span class="hl">✓ 可使用氫氣</span>
+<span class="dim">└────────────────────────────────┘</span>
+              ↓
+<span class="dim">┌─ 關閉 ───────────────────────────┐</span>
+氫氣罐 <span class="hl2">轉緊右邊(氣瓶主閥)</span> → 氣壓計 <span class="hl2">下降到 0</span>
+<span class="dim">（中間、左邊暫時不動）</span>
+         ↓
+關 V3 右下 → 流速計 <span class="hl2">開最大</span> <span class="dim">(加壓計掉到 0)</span>
+→ 轉鬆中間加壓閥 → 轉緊左邊閥門
+         ↓
+關 <span class="hl2">V1 左下 (H₂ 入口)</span> + <span class="hl2">上方黑色 H₂ 入口</span>
+         ↓
+開左上 <span class="hl">N₂ 沖洗</span> <span class="dim">(銀球對齊銀線)</span>
+         ↓
+關底下銀色主開關 → <span class="hl2">等 5 分鐘</span>
+         ↓
+關 V4 N₂ 入口 → 流速計開最大排空 N₂
+→ 左上氣壓計 <span class="hl">歸零</span> → 關 V2 右上 <span class="hl">BLEED</span>
+<span class="dim">└────────────────────────────────┘</span>
+</div>
+
+</div><!-- /panel-h2 -->
+
+<!-- ═══════════════ PANEL 5: Ar ═══════════════ -->
+<div class="panel panel-ar" id="panel-ar">
+
+<h1>🫧 Ar 氣瓶 SOP</h1>
+<div class="subtitle">Ar Gas Cylinder · 主閥 / 卸氣程序</div>
+
+<div class="section">
+<h2><span class="bar"></span>閥門位置對照<span class="idx">PRE</span></h2>
+<div class="card">
+  <table>
+    <tr><th>位置（左→右）</th><th>狀態</th><th>名稱</th></tr>
+    <tr><td><b>左</b></td><td>緊</td><td>出（出氣閥）</td></tr>
+    <tr><td><b>中</b></td><td>鬆</td><td>加壓（壓力閥）</td></tr>
+    <tr><td><b>右</b></td><td>緊</td><td>主閥</td></tr>
+  </table>
+  <div class="tip"><span class="lbl">💡</span>Ar 氣瓶主閥：<b>逆時針開、順時針關</b>，跟開瓶蓋一樣。</div>
+</div>
+</div>
+
+<div class="section">
+<h2><span class="bar"></span>⏹ Ar 卸氣（洩氣）<span class="idx">STOP</span></h2>
+<div class="card">
+  <div class="step"><div class="step-num">1</div><div class="step-body">先<b>關主閥</b>（順時針）</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body"><b>CVD 流量計</b>開<b>最大</b>，讓氣體洩完 — 約 <b>3 分鐘</b>，會自己卸到 <b>0</b></div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body">關閉 <b>CVD Ar 開關</b></div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body">轉<b>鬆 Ar 壓力閥</b></div></div>
+  <div class="danger" style="margin-top:10px">⚠ 務必先關主閥，再洩氣；壓力歸零後才可關 CVD Ar 開關、鬆壓力閥</div>
+</div>
+</div>
+
+</div><!-- /panel-ar -->
+
+<!-- ═══════════════ PANEL 0: 測試流程 (NEW) ═══════════════ -->
+<div class="panel panel-cvd" id="panel-cvd">
+
+<h1>🔥 新測試流程</h1>
+<div class="subtitle">Growth Test Recipes · 生長參數 / 加熱時間軸</div>
+
+<!-- ===== 測試流程 1 ===== -->
+<div class="section">
+<h2><span class="bar"></span>測試流程 ①　Stage 4 = 15 min<span class="idx">TEST 1</span></h2>
+<div class="card">
+  <div class="tip"><span class="lbl">📋</span><b>八、生長參數總表</b></div>
+  <table>
+    <tr><th>STAGE</th><th>時間</th><th>溫度</th><th>AR</th><th>H₂</th><th>備註</th></tr>
+    <tr><td><b>1</b></td><td>60 min</td><td>980°C</td><td>200</td><td>—</td><td>—</td></tr>
+    <tr><td><b>2</b></td><td>30 min</td><td>980°C</td><td>—</td><td>100</td><td>H₂ 退火延長（原 20 min）</td></tr>
+    <tr><td><b>3</b></td><td>10 min</td><td>950°C</td><td>200</td><td>8</td><td>降溫、氣體切換、穩定</td></tr>
+    <tr><td><b>4</b></td><td>15 min</td><td>950°C</td><td>200</td><td>8</td><td>🔥 加熱：氣體加熱 <span class="good">ON</span>、樟腦加熱 <span class="good">ON</span></td></tr>
+    <tr><td><b>5</b></td><td>放涼</td><td>—</td><td>200</td><td>8</td><td>氣體加熱 OFF、樟腦加熱 OFF</td></tr>
+  </table>
+</div>
+<div class="card">
+  <div class="tip"><span class="lbl">⏱</span><b>加熱流程</b>（時間從 Stage 1 開始算起）</div>
+  <table>
+    <tr><th>時間點</th><th>動作</th><th>氣體加熱</th><th>樟腦加熱</th></tr>
+    <tr><td>0–60 min（Stage 1）</td><td>980°C · Ar 200</td><td>OFF</td><td>OFF</td></tr>
+    <tr><td>60–90 min（Stage 2）</td><td>980°C · H₂ 100</td><td>OFF</td><td>OFF</td></tr>
+    <tr><td>90–100 min（Stage 3）</td><td>降到 950°C · Ar 200 + H₂ 8</td><td>OFF</td><td>OFF</td></tr>
+    <tr><td>100–115 min（Stage 4）</td><td>950°C · Ar 200 + H₂ 8 · 生長</td><td><span class="good">🔥 ON</span></td><td><span class="good">🔥 ON</span></td></tr>
+    <tr><td>115 min 之後（Stage 5）</td><td>自然降溫 · Ar 200 + H₂ 8</td><td>OFF</td><td>OFF</td></tr>
+  </table>
+</div>
+</div>
+
+<!-- ===== 測試流程 2 ===== -->
+<div class="section">
+<h2><span class="bar"></span>測試流程 ②　A 爐 / B 爐　Stage 4 = 10 min<span class="idx">TEST 2</span></h2>
+<div class="card">
+  <div class="tip"><span class="lbl">⚖</span>A 樟腦 <b>1.22 mg</b> · B 樟腦 <b>2.5 mg</b></div>
+  <table>
+    <tr><th>STAGE</th><th>時間</th><th>溫度</th><th>AR</th><th>H₂</th><th>備註</th></tr>
+    <tr><td><b>1</b></td><td>60 min</td><td>980°C</td><td>200</td><td>—</td><td>—</td></tr>
+    <tr><td><b>2</b></td><td>30 min</td><td>980°C</td><td>—</td><td>100</td><td>H₂ 退火延長</td></tr>
+    <tr><td><b>3</b></td><td>10 min</td><td>950°C</td><td>98</td><td>8</td><td>—</td></tr>
+    <tr><td><b>4</b></td><td>10 min</td><td>950°C</td><td>98</td><td>8</td><td>🔥 氣體加熱 <span class="good">ON</span>、樟腦加熱 <span class="good">ON</span></td></tr>
+    <tr><td><b>5</b></td><td>放涼</td><td>—</td><td>98</td><td>8</td><td>氣體加熱 OFF、樟腦加熱 OFF</td></tr>
+  </table>
+</div>
+<div class="card">
+  <table>
+    <tr><th>時間點</th><th>氣體加熱</th><th>樟腦加熱</th></tr>
+    <tr><td>0–100 min（Stage 1–3）</td><td>OFF</td><td>OFF</td></tr>
+    <tr><td>100–110 min（Stage 4）</td><td><span class="good">🔥 ON</span></td><td><span class="good">🔥 ON</span></td></tr>
+    <tr><td>110 min 之後（Stage 5）</td><td>OFF</td><td>OFF</td></tr>
+  </table>
+  <div class="danger" style="margin-top:10px">⚠ 與流程 ① 差異：Stage 4 縮短為 10 min；Stage 3–5 的 Ar 由 200 改為 <b>98</b>。</div>
+</div>
+</div>
+
+</div><!-- /panel-cvd -->
+
+  </div><!-- /wrap -->
+
+<!-- ═══════════════ TAB BAR (index.html design) ═══════════════ -->
+<nav class="tab-bar">
+  <button class="tab-btn tab-cvd" onclick="switchPanel('cvd')">
+    <span class="n">NEW</span>
+    <span class="icon">🔥</span>
+    <span class="t">測試流程</span>
+    <span class="corner"></span>
+  </button>
+  <button class="tab-btn tab-gr active" onclick="switchPanel('gr')">
+    <span class="n">PANEL 01</span>
+    <span class="icon">🔬</span>
+    <span class="t">GR 製備</span>
+    <span class="corner"></span>
+  </button>
+  <button class="tab-btn tab-mos2" onclick="switchPanel('mos2')">
+    <span class="n">PANEL 02</span>
+    <span class="icon">🧪</span>
+    <span class="t">MoS₂ 合成</span>
+    <span class="corner"></span>
+  </button>
+  <button class="tab-btn tab-pl" onclick="switchPanel('pl')">
+    <span class="n">PANEL 03</span>
+    <span class="icon">📊</span>
+    <span class="t">PL/Abs</span>
+    <span class="corner"></span>
+  </button>
+  <button class="tab-btn tab-h2" onclick="switchPanel('h2')">
+    <span class="n">PANEL 04</span>
+    <span class="icon">💨</span>
+    <span class="t">H₂ 純化</span>
+    <span class="corner"></span>
+  </button>
+  <button class="tab-btn tab-ar" onclick="switchPanel('ar')">
+    <span class="n">PANEL 05</span>
+    <span class="icon">🫧</span>
+    <span class="t">Ar</span>
+    <span class="corner"></span>
+  </button>
+</nav>
+
+<!-- ═══════════════ STEP BY STEP OVERLAY ═══════════════ -->
+<div class="sbs-overlay" id="sbsOverlay">
+  <div class="sbs-phone">
+    <div class="sbs-statusbar">
+      <span>LAB SOP</span>
+      <span id="sbsTime">--:--</span>
+    </div>
+    <div class="sbs-notch"></div>
+    <div class="sbs-header">
+      <button class="sbs-back" id="sbsBack">✕ 返回</button>
+      <span class="sbs-title" id="sbsTitle">STEP BY STEP</span>
+      <span class="sbs-counter" id="sbsCounter"></span>
+    </div>
+    <div class="sbs-themes">
+      <button type="button" class="thm-b" data-theme="mono">M</button>
+      <button type="button" class="thm-b" data-theme="ultra">U</button>
+      <button type="button" class="thm-b" data-theme="light">W</button>
+      <button type="button" class="thm-b" data-theme="dark">B</button>
+    </div>
+    <div class="sbs-viewport" id="sbsViewport"></div>
+    <div class="sbs-nav">
+      <button class="sbs-nav-btn" id="sbsPrev" disabled><span class="arrow">‹</span> 上一步</button>
+      <div class="sbs-progress">
+        <span class="sbs-progress-text" id="sbsProgressText">0 / 0</span>
+        <div class="sbs-progress-bar"><i id="sbsProgressFill" style="width:0"></i></div>
+      </div>
+      <button class="sbs-nav-btn" id="sbsNext">下一步 <span class="arrow">›</span></button>
+    </div>
+    <div class="sbs-home-ind"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   PANEL SWITCHING — slide + fade transition
+   direction follows tab order: 往前切 (GR→MoS₂→PL→H₂) 內容左移淡出、
+   新面板由右滑入；往回切則相反。
+   ============================================================ */
+const PANEL_ORDER = ['cvd','gr','mos2','pl','h2','ar'];
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let curPanel = 'gr';
+let switchTimer = null;
+
+function switchPanel(name){
+  if(name === curPanel || !document.getElementById('panel-' + name)) return;
+
+  /* tab buttons update immediately */
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.tab-' + name).classList.add('active');
+
+  const prev = document.getElementById('panel-' + curPanel);
+  const next = document.getElementById('panel-' + name);
+  const forward = PANEL_ORDER.indexOf(name) > PANEL_ORDER.indexOf(curPanel);
+  curPanel = name;
+
+  clearTimeout(switchTimer);
+  prev.classList.remove('active');
+
+  if(REDUCED_MOTION){
+    prev.style.display = '';
+    prev.style.animation = '';
+    next.style.display = '';
+    next.style.animation = '';
+    next.onanimationend = null;
+    next.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    return;
+  }
+
+  prev.style.display = 'block';
+  prev.style.animation = (forward ? 'slideOutLeft' : 'slideOutRight') + ' .26s ease forwards';
+
+  switchTimer = setTimeout(function(){
+    prev.style.display = 'none';
+    prev.style.animation = '';
+    next.style.display = '';   /* 清除先前離開時殘留的 inline display:none */
+    next.classList.add('active');
+    next.onanimationend = function(){
+      next.style.animation = '';
+      next.onanimationend = null;
+    };
+    next.style.animation = (forward ? 'slideInRight' : 'slideInLeft') + ' .28s ease';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 250);
+}
+
+/* ============================================================
+   MARQUEE TICKER — seamless loop
+   ============================================================ */
+(function buildTicker(){
+  const track = document.getElementById('tickTrack');
+  const items = ['LAB SOP','CYBER REFERENCE','GRAPHENE','MOS2 QDS','PL / ABS','H2 PURIFIER','SECURE CHANNEL',
+                 'LAB SOP','POSITIVE CONTROL','Z-26','GATEWAY ONLINE'];
+  const seg = items.map(function(t){ return '<span><b>'+t+'</b></span>'; }).join('');
+  track.innerHTML = seg + seg;
+})();
+
+/* ============================================================
+   BOOT — short, skippable
+   ============================================================ */
+(function boot(){
+  const el = document.getElementById('boot');
+  const I = document.getElementById('bootI');
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let done = false, anims = [];
+
+  document.getElementById('bootSkip').addEventListener('click', function(ev){ ev.stopPropagation(); finish(); });
+  el.addEventListener('pointerdown', finish);
+
+  function finish(){
+    if(done) return; done = true;
+    anims.forEach(function(a){ try{ a.cancel(); }catch(e){} });
+    if(el && el.parentNode) el.remove();
+  }
+  if(REDUCED || !document.documentElement.classList.contains('js') || !el.animate){ finish(); return; }
+
+  /* I 非線性放大 400 倍（指數式加速），接著整頁由全黑淡為透明 */
+  const ZOOM = 900, FADE = 700;
+  const zoom = I.animate(
+    [{transform:'scale(1)',opacity:1,offset:0},
+     {transform:'scale(400)',opacity:1,background:'#fff',offset:.9},
+     {transform:'scale(400)',opacity:1,background:'#000',offset:1}],
+    {duration:ZOOM, easing:'cubic-bezier(.7,0,.95,.4)', fill:'forwards'});
+  anims.push(zoom);
+  zoom.onfinish = function(){
+    if(done) return;
+    el.style.setProperty('background','#000','important');
+    const fade = el.animate([{opacity:1},{opacity:0}], {duration:FADE, easing:'ease-out', fill:'forwards'});
+    anims.push(fade);
+    fade.onfinish = finish;
+  };
+})();
+/* ============================================================
+   COLOUR MODE SWITCHER — mono / ultra / light / dark
+   ============================================================ */
+(function themeSwitcher(){
+  const THEME_ORDER = ['mono','ultra','light','dark'];
+  const FAV = {
+    mono:  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23111111'/%3E%3Ccircle cx='50' cy='50' r='39' fill='none' stroke='%23ffffff' stroke-width='14'/%3E%3Crect x='44' y='80' width='12' height='14' fill='%23111111'/%3E%3C/svg%3E",
+    ultra: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230b0016'/%3E%3Ccircle cx='50' cy='50' r='39' fill='none' stroke='%23D6FF00' stroke-width='14'/%3E%3Crect x='44' y='80' width='12' height='14' fill='%230b0016'/%3E%3C/svg%3E",
+    light: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23ffffff'/%3E%3Ccircle cx='50' cy='50' r='39' fill='none' stroke='%23ff0000' stroke-width='14'/%3E%3Crect x='44' y='80' width='12' height='14' fill='%23ffffff'/%3E%3C/svg%3E",
+    dark:  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23000000'/%3E%3Ccircle cx='50' cy='50' r='39' fill='none' stroke='%23ff0000' stroke-width='14'/%3E%3Crect x='44' y='80' width='12' height='14' fill='%23000000'/%3E%3C/svg%3E"
+  };
+  const META = { mono:'#111111', ultra:'#0b0016', light:'#ffffff', dark:'#000000' };
+
+  let fadeTimer = null;
+
+  function setTheme(name, silent){
+    if(THEME_ORDER.indexOf(name) < 0) name = 'mono';
+    const root = document.documentElement;
+
+    if(!silent){
+      root.classList.add('switching');
+      clearTimeout(fadeTimer);
+      fadeTimer = setTimeout(function(){ root.classList.remove('switching'); }, 440);
+    }
+
+    root.setAttribute('data-theme', name);
+    try{ localStorage.setItem('rk-theme', name); }catch(e){}
+
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if(meta) meta.setAttribute('content', META[name]);
+    const ico = document.querySelector('link[rel="icon"]');
+    if(ico) ico.setAttribute('href', FAV[name]);
+
+    document.querySelectorAll('.thm-b').forEach(function(b){
+      b.setAttribute('aria-pressed', b.getAttribute('data-theme') === name ? 'true' : 'false');
+    });
+  }
+
+  function cycleTheme(){
+    const cur = document.documentElement.getAttribute('data-theme') || 'mono';
+    setTheme(THEME_ORDER[(THEME_ORDER.indexOf(cur) + 1) % THEME_ORDER.length]);
+  }
+  window.LabSOP = window.LabSOP || {};
+  window.LabSOP.setTheme = setTheme;
+  window.LabSOP.cycleTheme = cycleTheme;
+
+  document.querySelectorAll('.thm-b').forEach(function(b){
+    b.addEventListener('click', function(){ setTheme(b.getAttribute('data-theme')); });
+  });
+
+  window.addEventListener('keydown', function(e){
+    if(e.metaKey || e.ctrlKey || e.altKey) return;
+    const t = e.target;
+    if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if(e.key === 't' || e.key === 'T'){ e.preventDefault(); cycleTheme(); }
+  });
+
+  /* 同步「首幀已決定的主題」到 UI（不重播淡入） */
+  setTheme(document.documentElement.getAttribute('data-theme') || 'mono', true);
+})();
+
+/* ============================================================
+   VIEWPORT MODE SWITCHER — auto-detect + manual toggle
+   Detects: screen width, touch capability, user-agent
+   States: 'auto' (follow detection), 'desktop' (forced), 'mobile' (forced)
+   ============================================================ */
+(function viewportMode(){
+  var root = document.documentElement;
+  var sw   = document.getElementById('vpSwitch');
+  var ind  = document.getElementById('vpIndicator');
+  var lblM = document.getElementById('vpLabelMobile');
+  var lblD = document.getElementById('vpLabelDesktop');
+
+  if(!sw) return; /* safety: element not found */
+
+  var DESKTOP_BP = 768; /* breakpoint in px */
+  var override = null;  /* null = auto, 'desktop', 'mobile' */
+
+  /* restore override from localStorage */
+  try{
+    var saved = localStorage.getItem('rk-viewport');
+    if(saved === 'desktop' || saved === 'mobile') override = saved;
+  }catch(e){}
+
+  /* detect environment */
+  function detectMode(){
+    var w = window.innerWidth;
+    var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    var isMobileUA = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    /* primary: screen width; secondary: touch + UA */
+    if(w >= DESKTOP_BP && !isMobileUA) return 'desktop';
+    if(w < DESKTOP_BP || isTouch || isMobileUA) return 'mobile';
+    return 'mobile';
+  }
+
+  function applyMode(mode){
+    root.classList.remove('vp-desktop','vp-mobile');
+    root.classList.add('vp-' + mode);
+
+    sw.setAttribute('data-state', mode);
+    sw.setAttribute('aria-checked', mode === 'desktop' ? 'true' : 'false');
+
+    if(lblM && lblD){
+      lblM.classList.toggle('active', mode === 'mobile');
+      lblD.classList.toggle('active', mode === 'desktop');
+    }
+  }
+
+  function update(){
+    var mode = override || detectMode();
+    applyMode(mode);
+
+    if(ind){
+      if(override){
+        ind.textContent = override === 'desktop' ? '🖥 DESKTOP' : '📱 MOBILE';
+      } else {
+        var detected = detectMode();
+        ind.textContent = detected === 'desktop' ? 'AUTO·🖥' : 'AUTO·📱';
+      }
+    }
+  }
+
+  /* toggle: auto → desktop → mobile → auto */
+  function cycle(){
+    if(override === null){
+      override = detectMode() === 'desktop' ? 'mobile' : 'desktop';
+    } else if(override === 'desktop'){
+      override = 'mobile';
+    } else {
+      override = null; /* back to auto */
+    }
+    try{ 
+      if(override) localStorage.setItem('rk-viewport', override);
+      else localStorage.removeItem('rk-viewport');
+    }catch(e){}
+    update();
+  }
+
+  /* events */
+  sw.addEventListener('click', cycle);
+  sw.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); cycle(); }
+  });
+
+  /* auto re-detect on resize (only when in auto mode) */
+  var resizeTimer = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function(){
+      if(!override) update();
+    }, 150);
+  });
+
+  /* keyboard shortcut: V to toggle viewport */
+  window.addEventListener('keydown', function(e){
+    if(e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target;
+    if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if(e.key === 'v' || e.key === 'V'){ e.preventDefault(); cycle(); }
+  });
+
+  /* initial apply */
+  update();
+
+  /* expose API */
+  window.LabSOP = window.LabSOP || {};
+  window.LabSOP.setViewport = function(mode){
+    if(mode === 'auto'){ override = null; }
+    else if(mode === 'desktop' || mode === 'mobile'){ override = mode; }
+    try{
+      if(override) localStorage.setItem('rk-viewport', override);
+      else localStorage.removeItem('rk-viewport');
+    }catch(e){}
+    update();
+  };
+  window.LabSOP.getViewport = function(){ return override || detectMode(); };
+})();
+
+/* ============================================================
+   STEP BY STEP LOGIC — iOS Page Card Stack Transitions
+   ============================================================ */
+(function stepByStepModule(){
+  const overlay = document.getElementById('sbsOverlay');
+  const trigger = document.getElementById('sbsTrigger');
+  const backBtn = document.getElementById('sbsBack');
+  const prevBtn = document.getElementById('sbsPrev');
+  const nextBtn = document.getElementById('sbsNext');
+  const titleEl = document.getElementById('sbsTitle');
+  const counterEl = document.getElementById('sbsCounter');
+  const progText = document.getElementById('sbsProgressText');
+  const progFill = document.getElementById('sbsProgressFill');
+  const viewport = document.getElementById('sbsViewport');
+  const timeEl = document.getElementById('sbsTime');
+
+  if(!overlay || !trigger || !viewport) return;
+
+  let currentSteps = [];
+  let currentIndex = 0;
+  let isAnimating = false;
+
+  function updateClock(){
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    if(timeEl) timeEl.textContent = h + ':' + m;
+  }
+  setInterval(updateClock, 30000);
+  updateClock();
+
+  function parseStepsFromPanel(panelId){
+    const panel = document.getElementById(panelId) || document.querySelector('.panel.active');
+    if(!panel) return [];
+
+    const panelName = panel.querySelector('h1') ? panel.querySelector('h1').textContent.trim() : 'SOP PROCEDURE';
+    const sections = panel.querySelectorAll('.section');
+    const steps = [];
+
+    sections.forEach((sec, sIdx) => {
+      const h2 = sec.querySelector('h2');
+      const secTitle = h2 ? h2.textContent.replace(/SEC\s*\d+|PRE|PL|ABS|START|STOP|MAP|FLOW|APPX/g, '').trim() : `章節 ${sIdx + 1}`;
+      
+      const stepRows = sec.querySelectorAll('.step');
+      if(stepRows.length > 0){
+        stepRows.forEach((st, rIdx) => {
+          const numEl = st.querySelector('.step-num');
+          const num = numEl ? numEl.textContent.trim() : String(rIdx + 1);
+          const body = st.querySelector('.step-body') ? st.querySelector('.step-body').innerHTML : st.innerHTML;
+          steps.push({
+            panelTitle: panelName,
+            secTitle: secTitle,
+            stepNum: num,
+            contentHtml: `<div class="sbs-body">${body}</div>`
+          });
+        });
+      } else {
+        const card = sec.querySelector('.card');
+        if(card){
+          steps.push({
+            panelTitle: panelName,
+            secTitle: secTitle,
+            stepNum: '•',
+            contentHtml: `<div class="sbs-body">${card.innerHTML}</div>`
+          });
+        }
+      }
+    });
+
+    return steps;
+  }
+
+  function renderCards(){
+    viewport.innerHTML = '';
+    currentSteps.forEach((step, idx) => {
+      const card = document.createElement('div');
+      card.className = 'sbs-card';
+      card.dataset.index = idx;
+      
+      let state = 'hidden-right';
+      if(idx === currentIndex) state = 'current';
+      else if(idx === currentIndex - 1) state = 'prev';
+      else if(idx === currentIndex - 2) state = 'prev-2';
+      else if(idx < currentIndex - 2) state = 'hidden-left';
+      card.setAttribute('data-state', state);
+
+      card.innerHTML = `
+        <div class="sbs-sec">${step.panelTitle} // ${step.secTitle}</div>
+        <div class="sbs-num">${step.stepNum}</div>
+        ${step.contentHtml}
+      `;
+      viewport.appendChild(card);
+    });
+    updateUI();
+  }
+
+  function updateUI(){
+    const total = currentSteps.length;
+    const cur = total > 0 ? currentIndex + 1 : 0;
+    
+    if(counterEl) counterEl.textContent = `${cur}/${total}`;
+    if(progText) progText.textContent = `${cur} / ${total}`;
+    if(progFill) progFill.style.width = total > 0 ? `${(cur / total) * 100}%` : '0%';
+
+    if(prevBtn) prevBtn.disabled = currentIndex <= 0 || isAnimating;
+    if(nextBtn) nextBtn.disabled = currentIndex >= total - 1 || isAnimating;
+
+    if(currentSteps[currentIndex] && titleEl){
+      titleEl.textContent = currentSteps[currentIndex].secTitle || 'STEP BY STEP';
+    }
+  }
+
+  function goToStep(newIndex, direction){
+    if(newIndex < 0 || newIndex >= currentSteps.length || isAnimating) return;
+    isAnimating = true;
+
+    const cards = viewport.querySelectorAll('.sbs-card');
+    const oldIdx = currentIndex;
+    currentIndex = newIndex;
+
+    const oldCard = cards[oldIdx];
+    const newCard = cards[newIndex];
+
+    const cleanAnim = (el) => {
+      el.className = 'sbs-card';
+    };
+
+    cards.forEach(cleanAnim);
+
+    if(direction === 'next'){
+      // Push transition (Right -> Left stacking)
+      if(oldCard){
+        oldCard.setAttribute('data-state', 'prev');
+        oldCard.classList.add('anim-push-back');
+      }
+      if(newCard){
+        newCard.setAttribute('data-state', 'current');
+        newCard.classList.add('anim-push-in');
+      }
+      if(cards[oldIdx - 1]){
+        cards[oldIdx - 1].setAttribute('data-state', 'prev-2');
+        cards[oldIdx - 1].classList.add('anim-stack-shrink');
+      }
+      if(cards[oldIdx - 2]){
+        cards[oldIdx - 2].setAttribute('data-state', 'hidden-left');
+      }
+    } else {
+      // Pop transition (Left -> Right unstacking)
+      if(oldCard){
+        oldCard.setAttribute('data-state', 'hidden-right');
+        oldCard.classList.add('anim-pop-out');
+      }
+      if(newCard){
+        newCard.setAttribute('data-state', 'current');
+        newCard.classList.add('anim-pop-fwd');
+      }
+      if(cards[newIndex - 1]){
+        cards[newIndex - 1].setAttribute('data-state', 'prev');
+        cards[newIndex - 1].classList.add('anim-stack-grow');
+      }
+      if(cards[newIndex - 2]){
+        cards[newIndex - 2].setAttribute('data-state', 'prev-2');
+      }
+    }
+
+    updateUI();
+
+    setTimeout(() => {
+      cards.forEach(cleanAnim);
+      cards.forEach((c, idx) => {
+        if(idx === currentIndex) c.setAttribute('data-state', 'current');
+        else if(idx === currentIndex - 1) c.setAttribute('data-state', 'prev');
+        else if(idx === currentIndex - 2) c.setAttribute('data-state', 'prev-2');
+        else if(idx < currentIndex - 2) c.setAttribute('data-state', 'hidden-left');
+        else c.setAttribute('data-state', 'hidden-right');
+      });
+      isAnimating = false;
+      updateUI();
+    }, 360);
+  }
+
+  function openSBS(){
+    const activePanel = document.querySelector('.panel.active');
+    const panelId = activePanel ? activePanel.id : 'panel-gr';
+    currentSteps = parseStepsFromPanel(panelId);
+    currentIndex = 0;
+    renderCards();
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSBS(){
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  trigger.addEventListener('click', openSBS);
+  backBtn.addEventListener('click', closeSBS);
+
+  nextBtn.addEventListener('click', () => goToStep(currentIndex + 1, 'next'));
+  prevBtn.addEventListener('click', () => goToStep(currentIndex - 1, 'prev'));
+
+  // Swipe support inside SBS viewport
+  let touchStartX = 0;
+  let touchStartY = 0;
+  viewport.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  viewport.addEventListener('touchend', (e) => {
+    const diffX = e.changedTouches[0].screenX - touchStartX;
+    const diffY = e.changedTouches[0].screenY - touchStartY;
+    if(Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40){
+      if(diffX < 0){
+        goToStep(currentIndex + 1, 'next'); // swipe left -> next
+      } else {
+        goToStep(currentIndex - 1, 'prev'); // swipe right -> prev
+      }
+    }
+  }, { passive: true });
+
+  // Keyboard navigation inside SBS
+  window.addEventListener('keydown', (e) => {
+    if(!overlay.classList.contains('active')) return;
+    if(e.key === 'Escape'){
+      closeSBS();
+    } else if(e.key === 'ArrowRight' || e.key === ' '){
+      e.preventDefault();
+      goToStep(currentIndex + 1, 'next');
+    } else if(e.key === 'ArrowLeft'){
+      e.preventDefault();
+      goToStep(currentIndex - 1, 'prev');
+    }
+  });
+
+  // Mini theme switcher clicks inside SBS
+  const sbsThemeBtns = overlay.querySelectorAll('.thm-b');
+  sbsThemeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const theme = btn.getAttribute('data-theme');
+      if(window.LabSOP && window.LabSOP.setTheme){
+        window.LabSOP.setTheme(theme);
+      }
+    });
+  });
+
+  // Close when tapping outside phone frame
+  overlay.addEventListener('click', (e) => {
+    if(e.target === overlay) closeSBS();
+  });
+})();
+</script>
+
+<!-- ═══════════════ LEFT SECTION NAV (collapsible) ═══════════════ -->
+<style>
+  #panel-cvd .card{overflow-x:auto}
+  #panel-cvd th,#panel-cvd td{white-space:nowrap}
+  .jn{position:fixed;left:0;top:50%;transform:translate(-100%,-50%);z-index:95;
+    width:min(220px,72vw);max-height:calc(100vh - 170px);display:flex;flex-direction:column;
+    background:var(--panel-solid);border:1px solid var(--line);border-left:none;border-radius:0 12px 12px 0;
+    box-shadow:0 10px 30px rgba(0,0,0,.45);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+  .jn.open{transform:translate(0,-50%)}
+  .jn-handle{position:absolute;left:100%;top:50%;transform:translateY(-50%);width:34px;height:84px;
+    background:var(--panel-solid);color:var(--accent);border:1px solid var(--line);border-left:none;border-radius:0 10px 10px 0;
+    cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;padding:0}
+  .jn-handle .ar{font-size:15px;line-height:1;transition:transform .3s}
+  .jn.open .jn-handle .ar{transform:rotate(180deg)}
+  .jn-handle .tx{writing-mode:vertical-rl}
+  .jn-head{padding:10px 14px 8px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted);border-bottom:1px solid var(--line)}
+  .jn-list{overflow-y:auto;padding:6px;display:flex;flex-direction:column;gap:4px}
+  .jn-item{display:flex;align-items:center;gap:8px;text-align:left;width:100%;cursor:pointer;
+    background:var(--panel);color:var(--fg);border:1px solid var(--line-soft);border-radius:8px;
+    padding:9px 10px;font-family:'Chakra Petch',sans-serif;font-size:13px;line-height:1.3}
+  .jn-item:hover,.jn-item:focus-visible{border-color:var(--accent);outline:none}
+  .jn-item .no{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--accent);flex-shrink:0}
+</style>
+<nav class="jn" id="jn" aria-label="流程快速跳轉">
+  <button class="jn-handle" id="jnHandle" aria-expanded="false" aria-label="開關流程目錄"><span class="ar">›</span><span class="tx">流程目錄</span></button>
+  <div class="jn-head">// JUMP TO</div>
+  <div class="jn-list" id="jnList"></div>
+</nav>
+<script>
+(function(){
+  var jn=document.getElementById('jn'), list=document.getElementById('jnList'), handle=document.getElementById('jnHandle');
+  function setOpen(o){ jn.classList.toggle('open',o); handle.setAttribute('aria-expanded',o);
+    try{localStorage.setItem('jn-open',o?'1':'0')}catch(e){} }
+  function build(name){
+    var panel=document.getElementById('panel-'+name); if(!panel) return;
+    list.innerHTML='';
+    panel.querySelectorAll('h2').forEach(function(h,i){
+      var c=h.cloneNode(true); c.querySelectorAll('.bar,.idx').forEach(function(x){x.remove()});
+      var b=document.createElement('button'); b.className='jn-item';
+      b.innerHTML='<span class="no">'+String(i+1).padStart(2,'0')+'</span><span></span>';
+      b.lastChild.textContent=c.textContent.trim();
+      b.onclick=function(){
+        var y=h.getBoundingClientRect().top+window.pageYOffset-16;
+        window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+        if(window.innerWidth<900) setOpen(false);
+      };
+      list.appendChild(b);
+    });
+  }
+  handle.onclick=function(){ setOpen(!jn.classList.contains('open')); };
+  var orig=window.switchPanel;
+  window.switchPanel=function(n){ orig.apply(this,arguments); build(n); };
+  build(typeof curPanel!=='undefined'?curPanel:'gr');
+  try{ if(localStorage.getItem('jn-open')==='1') setOpen(true); }catch(e){}
+})();
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a46b3f8bef8749fc',t:'MTc5MTM1ODcyNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
