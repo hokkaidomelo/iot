@@ -1,28 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-TW" data-theme="mono">
+<html lang="zh-TW" data-theme="pink">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>LAB SOP // CYBER REFERENCE</title>
 <meta name="description" content="Lab SOP — graphene, MoS₂ QDs, PL/Abs spectroscopy & H₂ gas purifier, rebuilt in the RKrint cyber style." />
-<meta name="theme-color" content="#111111" />
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23111111'/%3E%3Ccircle cx='50' cy='50' r='39' fill='none' stroke='%23ffffff' stroke-width='14'/%3E%3Crect x='44' y='80' width='12' height='14' fill='%23111111'/%3E%3C/svg%3E" />
+<meta name="theme-color" content="#ffffff" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23ffffff'/%3E%3Ccircle cx='50' cy='50' r='39' fill='none' stroke='%23e04f8c' stroke-width='14'/%3E%3Crect x='44' y='80' width='12' height='14' fill='%23ffffff'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Chakra+Petch:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
-<script>
-/* 首幀前決定主題，避免換色閃白。優先序：localStorage → #theme= → mono */
-(function(){
-  var v='mono';
-  try{
-    var s=localStorage.getItem('rk-theme');
-    if(!s){ var m=location.hash.match(/theme=(mono|ultra|light|dark)/); if(m) s=m[1]; }
-    if(s==='mono'||s==='ultra'||s==='light'||s==='dark') v=s;
-  }catch(e){}
-  document.documentElement.setAttribute('data-theme',v);
-  document.documentElement.classList.add('js');
-})();
-</script>
+<script>document.documentElement.setAttribute('data-theme','pink');document.documentElement.classList.add('js');</script>
 <style>
   :root{
     --radius:12px;
@@ -33,321 +21,143 @@
   }
 
   /* ══════════════════════════════════════════════════════════════
-     THEME TOKENS — 四種模式
-       mono  : 預設（深灰底 · 灰介面 · 白色主要重點）
-       ultra : 原始 RKrint ULTRA（深紫 + 檸檬黃）
-       light : 純白底 · 純紅重點
-       dark  : 純黑底 · 純紅重點
-     mono 模式以 #ffffff（白）作為主色、#888 灰作為介面色、#111 深灰作為底
-     ══════════════════════════════════════════════════════════════ */
+     THEME TOKENS - PINK only */
 
-  html[data-theme="mono"]{
-    --bg:#111111;
-    --bg-fx:
-      radial-gradient(1200px 900px at 78% 8%, rgba(255,255,255,.06), transparent 60%),
-      radial-gradient(1000px 800px at 12% 92%, rgba(255,255,255,.04), transparent 55%),
-      radial-gradient(700px 600px at 55% 50%, rgba(255,255,255,.02), transparent 60%);
-    --bg-grad:linear-gradient(180deg,#151515 0%,#111111 60%,#0e0e0e 100%);
-
-    --fg:#cccccc;
-    --muted:#777777;
-    --muted-2:rgba(204,204,204,.40);
-    --ink:#111111;
-
-    --accent:#ffffff;
-    --accent-2:#e8e8e8;
-    --accent-glow:rgba(255,255,255,.35);
-    --on-accent:#111111;
-    --focus:#ffffff;
-
-    --line:rgba(255,255,255,.16);
-    --line-soft:rgba(255,255,255,.08);
-    --table-line:rgba(255,255,255,.08);
-    --grid-line:rgba(255,255,255,.04);
-
-    --panel:rgba(255,255,255,.04);
-    --panel-solid:#1a1a1a;
-    --panel-2:rgba(255,255,255,.06);
-    --panel-3:rgba(255,255,255,.05);
-    --tint-1:rgba(255,255,255,.02);
-    --tint-2:rgba(255,255,255,.03);
-    --tab-tint:rgba(255,255,255,.04);
-    --hover-fx:radial-gradient(120px circle at 50% 0, rgba(255,255,255,.14), transparent 60%);
-    --icon-glow:rgba(255,255,255,.20);
-
-    --chip-bg:rgba(255,255,255,.08);
-    --chip-bd:rgba(255,255,255,.20);
-    --chip-glow:rgba(255,255,255,.08);
-
-    --strip:#ffffff;
-    --on-strip:#111111;
-    --idx:#666666;
-    --dim:#555555;
-    --orb-cut:#111111;
-
-    --scan:rgba(255,255,255,.04);
-    --scan-blend:screen;
-    --scan-op:.25;
-    --vignette:rgba(0,0,0,.70);
-    --noise-op:.06;
-
-    --ticker-bg:rgba(17,17,17,.80);
-    --tabbar-bg:rgba(17,17,17,.85);
-    --tab-active-bg:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.02));
-    --tab-active-glow:rgba(255,255,255,.18);
-    --boot-bg:radial-gradient(900px 760px at 50% 42%, rgba(255,255,255,.06), #111111 72%);
-    --boot-grid:rgba(255,255,255,.04);
-    --bar-bg:rgba(255,255,255,.12);
-    --bar-fill:#ffffff;
-    --shadow:rgba(0,0,0,.60);
-    --shadow-2:rgba(0,0,0,.50);
-    --corner-op:.40;
-
-    --warn:#e0a040;
-    --danger:#e05050;
-    --good:#ffffff;
-    --warn-soft:rgba(224,160,64,.10);
-    --danger-soft:rgba(224,80,80,.12);
-
-    /* mono 模式：所有面板共用純白，改以線條樣式區分 */
-    --accent-gr:#ffffff;
-    --accent-mos2:#ffffff;
-    --accent-pl:#ffffff;
-    --accent-h2:#ffffff;
-    --accent-ar:#ffffff;
-  }
-
-  html[data-theme="ultra"]{
-    --bg:#0b0016;
-    --bg-fx:
-      radial-gradient(1200px 900px at 78% 8%, rgba(90,0,255,.40), transparent 60%),
-      radial-gradient(1000px 800px at 12% 92%, rgba(90,0,255,.30), transparent 55%),
-      radial-gradient(700px 600px at 55% 50%, rgba(122,44,255,.14), transparent 60%);
-    --bg-grad:linear-gradient(180deg,#12001f 0%,#0b0016 60%,#0b0016 100%);
-
-    --fg:#eae6ff;
-    --muted:#8b83c0;
-    --muted-2:rgba(234,230,255,.45);
-    --ink:#04020a;
-
-    --accent:#D6FF00;
-    --accent-2:#c4f000;
-    --accent-glow:rgba(214,255,0,.6);
-    --on-accent:#04020a;
-    --focus:#D6FF00;
-
-    --line:rgba(214,255,0,.22);
-    --line-soft:rgba(214,255,0,.10);
-    --table-line:rgba(214,255,0,.10);
-    --grid-line:rgba(214,255,0,.05);
-
-    --panel:rgba(20,0,42,.42);
-    --panel-solid:#140026;
-    --panel-2:rgba(20,0,42,.60);
-    --panel-3:rgba(20,0,42,.50);
-    --tint-1:rgba(214,255,0,.03);
-    --tint-2:rgba(90,0,255,.08);
-    --tab-tint:rgba(90,0,255,.10);
-    --hover-fx:radial-gradient(120px circle at 50% 0, rgba(214,255,0,.25), transparent 60%);
-    --icon-glow:rgba(214,255,0,.25);
-
-    --chip-bg:rgba(214,255,0,.10);
-    --chip-bd:rgba(214,255,0,.22);
-    --chip-glow:rgba(214,255,0,.10);
-
-    --strip:#D6FF00;
-    --on-strip:#04020a;
-    --idx:#7a2cff;
-    --dim:#5a5e72;
-    --orb-cut:#04020a;
-
-    --scan:rgba(0,0,0,.22);
-    --scan-blend:overlay;
-    --scan-op:.30;
-    --vignette:rgba(0,0,0,.72);
-    --noise-op:.05;
-
-    --ticker-bg:rgba(11,0,22,.75);
-    --tabbar-bg:rgba(11,0,22,.82);
-    --tab-active-bg:linear-gradient(160deg,#1c0a33,#0b0016);
-    --tab-active-glow:rgba(214,255,0,.28);
-    --boot-bg:radial-gradient(900px 760px at 50% 42%,#1b0236,#0b0016 72%);
-    --boot-grid:rgba(214,255,0,.06);
-    --bar-bg:rgba(214,255,0,.14);
-    --bar-fill:#D6FF00;
-    --shadow:rgba(0,0,0,.60);
-    --shadow-2:rgba(0,0,0,.50);
-    --corner-op:.45;
-
-    --warn:#ffd166;
-    --danger:#ff6b7b;
-    --good:#D6FF00;
-    --warn-soft:rgba(255,209,102,.10);
-    --danger-soft:rgba(255,107,123,.12);
-
-    /* per-panel accents — ultra 保留原始色相（第 4 面板為洋紅） */
-    --accent-gr:#d6ff00;
-    --accent-mos2:#a78bfa;
-    --accent-pl:#57e6d8;
-    --accent-h2:#ff7ae0;
-    --accent-ar:#ff7ae0;
-  }
-
-  html[data-theme="light"]{
+  /* pink : 粉紅筆記本 — 玫瑰粉重點 · 淡粉底 · 粉色直條 */
+  html[data-theme="pink"]{
     --bg:#ffffff;
-    --bg-fx:
-      radial-gradient(1100px 820px at 80% 4%, rgba(255,0,0,.10), transparent 62%),
-      radial-gradient(900px 720px at 8% 96%, rgba(255,0,0,.08), transparent 58%),
-      radial-gradient(700px 600px at 55% 50%, rgba(255,0,0,.03), transparent 60%);
+    --bg-fx:none;
     --bg-grad:linear-gradient(180deg,#ffffff 0%,#ffffff 100%);
 
-    --fg:#000000;
-    --muted:rgba(0,0,0,.62);
-    --muted-2:rgba(0,0,0,.38);
-    --ink:#ffffff;
+    --fg:#5a2a40;
+    --muted:rgba(90,42,64,.62);
+    --muted-2:rgba(90,42,64,.38);
+    --ink:#fff6fa;
 
-    --accent:#ff0000;
-    --accent-2:#ff0000;
-    --accent-glow:rgba(255,0,0,.55);
+    --accent:#e04f8c;
+    --accent-2:#d03d7c;
+    --accent-glow:rgba(224,79,140,.45);
     --on-accent:#ffffff;
-    --focus:#ff0000;
+    --focus:#e04f8c;
 
-    --line:rgba(255,0,0,.30);
-    --line-soft:rgba(255,0,0,.12);
-    --table-line:rgba(0,0,0,.10);
-    --grid-line:rgba(255,0,0,.10);
+    --line:rgba(224,79,140,.32);
+    --line-soft:rgba(224,79,140,.14);
+    --table-line:rgba(224,79,140,.16);
+    --grid-line:rgba(224,79,140,.10);
 
     --panel:rgba(255,255,255,.72);
     --panel-solid:#ffffff;
-    --panel-2:rgba(255,0,0,.05);
-    --panel-3:rgba(255,0,0,.04);
-    --tint-1:rgba(255,0,0,.03);
-    --tint-2:rgba(255,0,0,.05);
-    --tab-tint:rgba(255,0,0,.05);
-    --hover-fx:radial-gradient(120px circle at 50% 0, rgba(255,0,0,.16), transparent 60%);
-    --icon-glow:rgba(255,0,0,.25);
+    --panel-2:rgba(240,176,204,.22);
+    --panel-3:rgba(240,176,204,.16);
+    --tint-1:rgba(240,176,204,.14);
+    --tint-2:rgba(224,79,140,.05);
+    --tab-tint:rgba(240,176,204,.20);
+    --hover-fx:radial-gradient(120px circle at 50% 0, rgba(224,79,140,.20), transparent 60%);
+    --icon-glow:rgba(224,79,140,.28);
 
-    --chip-bg:rgba(255,0,0,.08);
-    --chip-bd:rgba(255,0,0,.30);
-    --chip-glow:rgba(255,0,0,.10);
+    --chip-bg:rgba(224,79,140,.10);
+    --chip-bd:rgba(224,79,140,.32);
+    --chip-glow:rgba(224,79,140,.12);
 
-    --strip:#ff0000;
-    --on-strip:#ffffff;
-    --idx:rgba(0,0,0,.45);
-    --dim:rgba(0,0,0,.34);
-    --orb-cut:#ffffff;
+    --strip:#f0b0cc;
+    --on-strip:#e04f8c;
+    --idx:rgba(90,42,64,.45);
+    --dim:rgba(90,42,64,.34);
 
-    --scan:rgba(0,0,0,.06);
-    --scan-blend:multiply;
-    --scan-op:.55;
-    --vignette:rgba(0,0,0,.10);
-    --noise-op:.05;
 
-    --ticker-bg:rgba(255,255,255,.80);
-    --tabbar-bg:rgba(255,255,255,.85);
-    --tab-active-bg:linear-gradient(160deg,rgba(255,0,0,.12),rgba(255,0,0,.02));
-    --tab-active-glow:rgba(255,0,0,.30);
-    --boot-bg:radial-gradient(900px 760px at 50% 42%, rgba(255,0,0,.05), #ffffff 72%);
-    --boot-grid:rgba(255,0,0,.08);
-    --bar-bg:rgba(255,0,0,.12);
-    --bar-fill:#ff0000;
-    --shadow:rgba(0,0,0,.18);
-    --shadow-2:rgba(0,0,0,.14);
+    --ticker-bg:rgba(255,255,255,.90);
+    --tabbar-bg:rgba(255,255,255,.92);
+    --tab-active-bg:linear-gradient(160deg,rgba(224,79,140,.16),rgba(240,176,204,.06));
+    --tab-active-glow:rgba(224,79,140,.32);
+    --boot-bg:#ffffff;
+    --boot-grid:rgba(224,79,140,.10);
+    --bar-bg:rgba(224,79,140,.14);
+    --bar-fill:#e04f8c;
+    --shadow:rgba(224,79,140,.18);
+    --shadow-2:rgba(224,79,140,.14);
     --corner-op:.55;
 
-    --warn:#ff0000;
-    --danger:#ff0000;
-    --good:#000000;
-    --warn-soft:rgba(255,0,0,.07);
-    --danger-soft:rgba(255,0,0,.12);
+    --warn:#d03d7c;
+    --danger:#c8326f;
+    --good:#5a2a40;
+    --warn-soft:rgba(224,79,140,.08);
+    --danger-soft:rgba(224,79,140,.14);
 
-    /* 三色模式：所有面板共用純紅，改以線條樣式區分 */
-    --accent-gr:#ff0000;
-    --accent-mos2:#ff0000;
-    --accent-pl:#ff0000;
-    --accent-h2:#ff0000;
-    --accent-ar:#ff0000;
+    --accent-gr:#e04f8c;
+    --accent-mos2:#e04f8c;
+    --accent-pl:#e04f8c;
+    --accent-h2:#e04f8c;
+    --accent-ar:#e04f8c;
   }
+  html[data-theme="pink"] .panel-mos2{--bd-style:dashed;--bd-w:1px;--bar-fx:repeating-linear-gradient(180deg,var(--accent) 0 4px,transparent 4px 8px)}
+  html[data-theme="pink"] .panel-pl{--bd-style:double;--bd-w:3px;--bar-fx:linear-gradient(180deg,var(--accent) 0 38%,transparent 38% 62%,var(--accent) 62% 100%)}
+  html[data-theme="pink"] .panel-h2,html[data-theme="pink"] .panel-ar{--bd-style:dotted;--bd-w:2px;--bar-fx:repeating-linear-gradient(180deg,var(--accent) 0 2.5px,transparent 2.5px 7px)}
+  html[data-theme="pink"] .tab-btn.tab-mos2.active{--bd-style:dashed;--bd-w:1px;--bar-fx:repeating-linear-gradient(90deg,var(--accent) 0 5px,transparent 5px 10px)}
+  html[data-theme="pink"] .tab-btn.tab-pl.active{--bd-style:double;--bd-w:3px;--bar-fx:linear-gradient(90deg,var(--accent) 0 34%,transparent 34% 66%,var(--accent) 66% 100%)}
+  html[data-theme="pink"] .tab-btn.tab-h2.active,html[data-theme="pink"] .tab-btn.tab-ar.active{--bd-style:dotted;--bd-w:2px;--bar-fx:repeating-linear-gradient(90deg,var(--accent) 0 3px,transparent 3px 8px)}
+  html[data-theme="pink"] .vp-switch[data-state="desktop"]{background:rgba(224,79,140,.10)}
 
-  html[data-theme="dark"]{
-    --bg:#000000;
-    --bg-fx:
-      radial-gradient(1100px 820px at 80% 4%, rgba(255,0,0,.22), transparent 62%),
-      radial-gradient(900px 720px at 8% 96%, rgba(255,0,0,.16), transparent 58%),
-      radial-gradient(700px 600px at 55% 50%, rgba(255,0,0,.07), transparent 60%);
-    --bg-grad:linear-gradient(180deg,#000000 0%,#000000 100%);
-
-    --fg:#ffffff;
-    --muted:rgba(255,255,255,.62);
-    --muted-2:rgba(255,255,255,.38);
-    --ink:#000000;
-
-    --accent:#ff0000;
-    --accent-2:#ff0000;
-    --accent-glow:rgba(255,0,0,.55);
-    --on-accent:#ffffff;
-    --focus:#ff0000;
-
-    --line:rgba(255,0,0,.34);
-    --line-soft:rgba(255,0,0,.15);
-    --table-line:rgba(255,255,255,.10);
-    --grid-line:rgba(255,0,0,.13);
-
-    --panel:rgba(255,255,255,.045);
-    --panel-solid:rgba(255,255,255,.06);
-    --panel-2:rgba(255,255,255,.06);
-    --panel-3:rgba(255,255,255,.05);
-    --tint-1:rgba(255,0,0,.05);
-    --tint-2:rgba(255,0,0,.07);
-    --tab-tint:rgba(255,0,0,.08);
-    --hover-fx:radial-gradient(120px circle at 50% 0, rgba(255,0,0,.30), transparent 60%);
-    --icon-glow:rgba(255,0,0,.30);
-
-    --chip-bg:rgba(255,0,0,.14);
-    --chip-bd:rgba(255,0,0,.40);
-    --chip-glow:rgba(255,0,0,.18);
-
-    --strip:#ff0000;
-    --on-strip:#ffffff;
-    --idx:rgba(255,255,255,.45);
-    --dim:rgba(255,255,255,.34);
-    --orb-cut:#000000;
-
-    --scan:rgba(255,255,255,.07);
-    --scan-blend:screen;
-    --scan-op:.50;
-    --vignette:rgba(0,0,0,.85);
-    --noise-op:.10;
-
-    --ticker-bg:rgba(0,0,0,.78);
-    --tabbar-bg:rgba(0,0,0,.85);
-    --tab-active-bg:linear-gradient(160deg,rgba(255,0,0,.22),rgba(255,0,0,.04));
-    --tab-active-glow:rgba(255,0,0,.35);
-    --boot-bg:radial-gradient(900px 760px at 50% 42%, rgba(255,0,0,.12), #000000 72%);
-    --boot-grid:rgba(255,0,0,.10);
-    --bar-bg:rgba(255,0,0,.18);
-    --bar-fill:#ff0000;
-    --shadow:rgba(0,0,0,.70);
-    --shadow-2:rgba(0,0,0,.60);
-    --corner-op:.55;
-
-    --warn:#ff0000;
-    --danger:#ff0000;
-    --good:#ffffff;
-    --warn-soft:rgba(255,0,0,.10);
-    --danger-soft:rgba(255,0,0,.18);
-
-    /* 三色模式：所有面板共用純紅，改以線條樣式區分 */
-    --accent-gr:#ff0000;
-    --accent-mos2:#ff0000;
-    --accent-pl:#ff0000;
-    --accent-h2:#ff0000;
-    --accent-ar:#ff0000;
+  /* ---- 頂部大骰子按鈕 ---- */
+  .big-dice{
+    display:flex;align-items:center;justify-content:center;gap:clamp(12px,3vw,22px);
+    width:100%;margin:40px 0 0;padding:clamp(16px,3.5vw,24px);cursor:pointer;
+    background:var(--accent);color:var(--on-accent);border:2px solid var(--accent);border-radius:18px;
+    box-shadow:0 0 28px var(--accent-glow),0 10px 26px var(--shadow-2);
+    font-family:'Anton';text-transform:uppercase;transition:transform .15s,box-shadow .22s;
+    position:relative;z-index:6;
   }
+  .big-dice:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 0 40px var(--accent-glow),0 14px 30px var(--shadow-2)}
+  .big-dice:active:not(:disabled){transform:scale(.98)}
+  .big-dice:disabled{cursor:default;opacity:.92}
+  .big-dice:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
+  .bd-dice{display:flex;gap:clamp(6px,1.6vw,10px)}
+  .bd-dice i{
+    font-style:normal;width:clamp(46px,12vw,68px);aspect-ratio:1;border-radius:12px;
+    background:var(--on-accent);color:var(--accent);display:flex;align-items:center;justify-content:center;
+    font-size:clamp(17px,4.6vw,26px);line-height:1;box-shadow:inset 0 0 0 2px var(--accent-glow);
+  }
+  .bd-d{display:flex;flex-direction:column;align-items:center;gap:5px}
+  .bd-d em{font-style:normal;font-family:'Share Tech Mono';font-size:clamp(9px,2.2vw,11px);letter-spacing:.06em;line-height:1.25;text-align:center;text-transform:none}
+  .dice-ov{
+    position:fixed;inset:0;z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;gap:clamp(18px,4vh,36px);
+    background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:16px;
+  }
+  .dice-ov.on{display:flex;animation:ovIn .25s ease-out}
+  @keyframes ovIn{from{opacity:0}to{opacity:1}}
+  .ov-row{display:flex;gap:clamp(10px,3vw,40px);justify-content:center;flex-wrap:wrap}
+  .ov-d{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .ov-d i{
+    font-style:normal;width:clamp(96px,26vw,220px);aspect-ratio:1;border-radius:24px;
+    background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;
+    font-family:'Anton';font-size:clamp(30px,9vw,76px);line-height:1;
+    box-shadow:0 0 50px var(--accent-glow),0 18px 40px var(--shadow-2);
+  }
+  #ovH2{font-size:clamp(24px,7vw,60px)}
+  .ov-d em{font-style:normal;font-family:'Share Tech Mono';font-size:clamp(11px,2.6vw,16px);letter-spacing:.1em;color:var(--fg);text-align:center}
+  .ov-d i.rolling{animation:ovTumble .55s linear infinite}
+  .ov-d i.landed{animation:ovLand .7s cubic-bezier(.3,1.6,.5,1)}
+  .ov-d:nth-child(2) i.rolling{animation-delay:-.2s}
+  .ov-d:nth-child(3) i.rolling{animation-delay:-.4s}
+  @keyframes ovTumble{
+    0%{transform:translate(-5vw,-6vh) rotate(0)}
+    25%{transform:translate(4vw,7vh) rotate(110deg) scale(1.12)}
+    50%{transform:translate(-3vw,-8vh) rotate(220deg)}
+    75%{transform:translate(5vw,4vh) rotate(300deg) scale(1.08)}
+    100%{transform:translate(-5vw,-6vh) rotate(360deg)}
+  }
+  @keyframes ovLand{0%{transform:scale(1.7) rotate(28deg)}100%{transform:scale(1) rotate(0)}}
+  .ov-sum{font-family:'Share Tech Mono';font-size:clamp(12px,3vw,20px);letter-spacing:.08em;color:var(--accent);text-align:center;min-height:1.6em;max-width:90vw}
+  @media (prefers-reduced-motion: reduce){.ov-d i.rolling,.ov-d i.landed{animation:none}.dice-ov.on{animation:none}}
+  .bd-dice i.rolling{animation:dieShake .18s linear infinite}
+  .bd-dice i.landed{animation:dieLand .45s cubic-bezier(.3,1.6,.5,1)}
+  .bd-txt{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left}
+  .bd-txt b{font-weight:400;font-size:clamp(22px,6vw,38px);line-height:1;letter-spacing:.04em}
+  .bd-txt small{font-family:'Share Tech Mono';font-size:clamp(10px,2.4vw,13px);letter-spacing:.1em;opacity:.9;text-transform:none}
+  @media (prefers-reduced-motion: reduce){.bd-dice i.rolling,.bd-dice i.landed{animation:none}}
+  @media(max-width:480px){.bd-txt small:not(.bd-when){display:none}}
 
   /* 灰階噪點（去飽和，保證不會帶入黑/白/紅以外的色相） */
   :root{
-    --noise-img:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
@@ -385,21 +195,6 @@
     animation:gridDrift 18s linear infinite;
   }
   @keyframes gridDrift{to{background-position:46px 0,46px 0}}
-  .noise{
-    position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:var(--noise-op);
-    background-image:var(--noise-img);
-    animation:grain 1.6s steps(2) infinite;
-  }
-  @keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-2%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(0,0)}}
-  .scanlines{
-    position:fixed;inset:0;z-index:50;pointer-events:none;opacity:var(--scan-op);mix-blend-mode:var(--scan-blend);
-    background:repeating-linear-gradient(0deg, var(--scan) 0 1px, transparent 1px 3px);
-  }
-  .vignette{
-    position:fixed;inset:0;z-index:1;pointer-events:none;
-    box-shadow:inset 0 0 240px var(--vignette);
-  }
-  .orb-cut{fill:var(--orb-cut)}
 
   /* vertical marquee strip — index signature */
   .vstrip{
@@ -434,24 +229,9 @@
   .ticker-track span::after{content:"▮";color:var(--idx);opacity:.6;margin-left:26px}
   @keyframes tick{to{transform:translateX(-50%)}}
 
-  /* ---- theme switcher ---- */
-  .thm{
-    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
-    padding:10px 0 0;font-family:'Share Tech Mono',monospace;
-    font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-  }
-  .thm-l{color:var(--muted);margin-right:2px}
-  .thm-b{
-    background:var(--panel-2);border:1px solid var(--line);border-radius:6px;
-    color:var(--muted);font:inherit;letter-spacing:.16em;text-transform:uppercase;
-    padding:5px 9px;cursor:pointer;transition:background-color .22s,border-color .22s,color .22s;
-  }
-  .thm-b:hover{border-color:var(--accent);color:var(--fg)}
-  .thm-b:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-  .thm-b[aria-pressed="true"]{
-    background:var(--accent);border-color:var(--accent);
-    color:var(--on-accent);font-weight:700;
-  }
+  /* ---- hint row ---- */
+  .thm{display:flex;align-items:center;gap:6px;padding:10px 0 0;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+  .thm-l{color:var(--muted)}
 
   /* ---- top HUD ---- */
   .topbar{
@@ -482,8 +262,6 @@
   }
   .brand .word{position:relative;display:inline-block}
   .brand .word em{font-style:normal;color:var(--accent)}
-  .logo-orb{flex:0 0 auto;width:clamp(48px,10vw,76px);height:clamp(48px,10vw,76px);animation:orbFloat 7s ease-in-out infinite}
-  @keyframes orbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
   .brand-strip{
     margin-top:clamp(12px,2vw,18px);display:inline-flex;align-items:center;gap:14px;
     background:var(--ink);border:1px solid var(--line);padding:9px 14px;border-radius:6px;
@@ -506,27 +284,6 @@
 
   /* 單色模式：色相全部收斂，改用線條樣式區分
      GR = 實線 solid ／ MoS₂ = 虛線 dashed ／ PL = 雙線 double ／ H₂ = 點線 dotted */
-  html[data-theme="mono"]  .panel-mos2,
-  html[data-theme="light"] .panel-mos2,
-  html[data-theme="dark"]  .panel-mos2{
-    --bd-style:dashed; --bd-w:1px;
-    --bar-fx:repeating-linear-gradient(180deg,var(--accent) 0 4px,transparent 4px 8px);
-  }
-  html[data-theme="mono"]  .panel-pl,
-  html[data-theme="light"] .panel-pl,
-  html[data-theme="dark"]  .panel-pl{
-    --bd-style:double; --bd-w:3px;
-    --bar-fx:linear-gradient(180deg,var(--accent) 0 38%,transparent 38% 62%,var(--accent) 62% 100%);
-  }
-  html[data-theme="mono"]  .panel-h2,
-  html[data-theme="light"] .panel-h2,
-  html[data-theme="dark"]  .panel-h2,
-  html[data-theme="mono"]  .panel-ar,
-  html[data-theme="light"] .panel-ar,
-  html[data-theme="dark"]  .panel-ar{
-    --bd-style:dotted; --bd-w:2px;
-    --bar-fx:repeating-linear-gradient(180deg,var(--accent) 0 2.5px,transparent 2.5px 7px);
-  }
 
   /* ---- panel switch animation (slide + fade) ---- */
   @keyframes slideOutLeft{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-72px)}}
@@ -687,32 +444,49 @@
   .tab-btn.tab-h2.active{--accent:var(--accent-h2);--bar-fx:var(--accent-h2)}
   .tab-btn.tab-ar.active{--accent:var(--accent-ar);--bar-fx:var(--accent-ar)}
   .tab-btn.tab-cvd.active{--accent:var(--accent-gr);--bar-fx:var(--accent-gr)}
-  html[data-theme="mono"]  .tab-btn.tab-mos2.active,
-  html[data-theme="light"] .tab-btn.tab-mos2.active,
-  html[data-theme="dark"]  .tab-btn.tab-mos2.active{
-    --bd-style:dashed; --bd-w:1px;
-    --bar-fx:repeating-linear-gradient(90deg,var(--accent) 0 5px,transparent 5px 10px);
+
+  /* ---- GR MAKE 骰子 ---- */
+  .dice-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 12px}
+  .die-box{text-align:center}
+  .die{
+    width:100%;max-width:92px;aspect-ratio:1;margin:0 auto 6px;border-radius:14px;
+    border:2px solid var(--accent);background:var(--panel-solid);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Anton';font-size:clamp(24px,7vw,34px);line-height:1;
+    box-shadow:0 0 18px var(--accent-glow),inset 0 0 12px var(--chip-glow);
   }
-  html[data-theme="mono"]  .tab-btn.tab-pl.active,
-  html[data-theme="light"] .tab-btn.tab-pl.active,
-  html[data-theme="dark"]  .tab-btn.tab-pl.active{
-    --bd-style:double; --bd-w:3px;
-    --bar-fx:linear-gradient(90deg,var(--accent) 0 34%,transparent 34% 66%,var(--accent) 66% 100%);
-  }
-  html[data-theme="mono"]  .tab-btn.tab-h2.active,
-  html[data-theme="light"] .tab-btn.tab-h2.active,
-  html[data-theme="dark"]  .tab-btn.tab-h2.active,
-  html[data-theme="mono"]  .tab-btn.tab-ar.active,
-  html[data-theme="light"] .tab-btn.tab-ar.active,
-  html[data-theme="dark"]  .tab-btn.tab-ar.active{
-    --bd-style:dotted; --bd-w:2px;
-    --bar-fx:repeating-linear-gradient(90deg,var(--accent) 0 3px,transparent 3px 8px);
-  }
+  .die small{font-family:'Share Tech Mono';font-size:.42em;margin-left:2px;color:var(--muted)}
+  #dieH2{font-size:clamp(17px,4.6vw,24px)}
+  #tdH2{font-size:clamp(13px,3.4vw,19px)}
+  .die.rolling{animation:dieShake .18s linear infinite}
+  .die.landed{animation:dieLand .45s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes dieShake{0%{transform:rotate(-9deg) translateY(0)}25%{transform:rotate(8deg) translateY(-6px)}50%{transform:rotate(-6deg) translateY(2px)}75%{transform:rotate(10deg) translateY(-4px)}100%{transform:rotate(-9deg) translateY(0)}}
+  @keyframes dieLand{0%{transform:scale(1.35) rotate(14deg)}100%{transform:scale(1) rotate(0)}}
+  .die-lbl{font-family:'Share Tech Mono';font-size:.7rem;letter-spacing:.1em;color:var(--muted)}
+  [data-sync]{transition:background-color .4s,color .4s}
+  [data-sync].synced{background:var(--chip-bg);color:var(--accent);font-weight:700;border-radius:3px;padding:0 3px}
+  .dice-hist{margin-top:12px;font-size:.8rem}
+  .dice-hist summary{cursor:pointer;color:var(--accent);font-family:'Share Tech Mono';letter-spacing:.08em}
+  .hist-list{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+  .hist-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:5px 8px;border:1px solid var(--line-soft);border-radius:6px}
+  .hist-row .tm{font-family:'Share Tech Mono';color:var(--muted);font-size:.74rem}
+  .hist-row .rc{flex:1;min-width:150px}
+  .hist-row button,.hist-clear{background:var(--chip-bg);border:1px solid var(--accent);border-radius:5px;color:var(--accent);font-family:'Share Tech Mono';font-size:10px;padding:3px 8px;cursor:pointer}
+  .hist-row button:hover,.hist-clear:hover{background:var(--accent);color:var(--on-accent)}
+  .hist-clear{margin-top:8px}
+  .hist-empty{color:var(--muted)}
+  .dice-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .dice-btns button{
+    background:var(--chip-bg);border:1px solid var(--accent);border-radius:6px;color:var(--accent);
+    font-family:'Share Tech Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    padding:7px 12px;cursor:pointer;transition:.22s}
+  .dice-btns button:hover:not(:disabled){background:var(--accent);color:var(--on-accent)}
+  .dice-btns button:disabled{opacity:.5;cursor:default}
+  @media (prefers-reduced-motion: reduce){.die.rolling,.die.landed{animation:none}}
 
   /* ---- responsive ---- */
   @media(max-width:640px){
     .vstrip{display:none}
-    .scanlines{opacity:.22}
     .wrap{padding-top:14px}
     .tab-bar{gap:5px;padding-left:6px;padding-right:6px}
     .tab-btn{padding:8px 4px;gap:2px}
@@ -768,9 +542,6 @@
     transform:translateX(18px);background:var(--accent);
   }
   .vp-switch[data-state="desktop"]{border-color:var(--accent);background:rgba(214,255,0,.08)}
-  html[data-theme="mono"]  .vp-switch[data-state="desktop"]{background:rgba(255,255,255,.08)}
-  html[data-theme="light"] .vp-switch[data-state="desktop"],
-  html[data-theme="dark"] .vp-switch[data-state="desktop"]{background:rgba(255,0,0,.08)}
 
   .vp-mode-labels{display:flex;gap:2px;font-size:9px;letter-spacing:.1em}
   .vp-mode-labels span{color:var(--dim);transition:color .22s}
@@ -822,9 +593,8 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .grid,.noise,.ticker-track,.logo-orb{animation:none!important}
+    .grid,.ticker-track{animation:none!important}
     .tab-btn::after{display:none!important}
-    .scanlines{opacity:.15}
     .boot{clip-path:none!important;opacity:0!important;pointer-events:none!important;display:none!important}
     html.switching,html.switching *{transition:none!important}
   }
@@ -923,12 +693,6 @@
     color:var(--muted);letter-spacing:.1em;
   }
 
-  /* ---- mini theme switcher in SBS ---- */
-  .sbs-themes{
-    display:flex;gap:3px;padding:6px 14px;flex-shrink:0;
-    border-bottom:1px solid var(--line-soft);
-  }
-  .sbs-themes .thm-b{padding:3px 7px;font-size:8px;letter-spacing:.12em}
 
   /* ---- card viewport ---- */
   .sbs-viewport{
@@ -1032,9 +796,6 @@
 <body>
   <div class="bg"></div>
   <div class="grid"></div>
-  <div class="noise"></div>
-  <div class="scanlines"></div>
-  <div class="vignette"></div>
   <div class="vstrip"><span>lab·sop</span></div>
 
   <!-- boot -->
@@ -1044,9 +805,29 @@
     <button class="boot-skip" id="bootSkip" tabindex="0">SKIP ▸</button>
   </div>
 
+  <!-- 全螢幕擲骰動畫（放在 .wrap 外，才能蓋過底部分頁列） -->
+  <div class="dice-ov" id="diceOv" aria-hidden="true">
+    <div class="ov-row">
+      <span class="ov-d"><i id="ovCam">1.24</i><em>樟腦 mg</em></span>
+      <span class="ov-d"><i id="ovH2">98:8</i><em>生長階段 Ar:H₂ 比例</em></span>
+      <span class="ov-d"><i id="ovTime">10</i><em>Stage 4 時間 min</em></span>
+    </div>
+    <div class="ov-sum" id="ovSum"></div>
+  </div>
+
   <div class="wrap">
 
     <div class="ticker" aria-hidden="true"><div class="ticker-track" id="tickTrack"></div></div>
+
+    <!-- 頂部大骰子按鈕 -->
+    <button type="button" class="big-dice" id="bigDice" aria-label="擲骰子產生今日 GR 配方">
+      <span class="bd-dice">
+        <span class="bd-d"><i id="tdCam">1.24</i><em>樟腦<br>mg</em></span>
+        <span class="bd-d"><i id="tdH2">98:8</i><em>生長階段<br>Ar:H₂ 比例</em></span>
+        <span class="bd-d"><i id="tdTime">10</i><em>Stage 4 時間<br>min</em></span>
+      </span>
+      <span class="bd-txt"><b>🎲 點我擲骰 Roll GR</b><small id="tdSum">Ar 98 : H₂ 8 · 1.24 mg · 10 min</small><small class="bd-when" id="tdWhen">尚未擲過</small></span>
+    </button>
 
     <!-- viewport mode toggle -->
     <div class="vp-toggle" id="vpToggle">
@@ -1074,22 +855,12 @@
     </div>
 
     <div class="thm" role="group" aria-label="Colour mode">
-      <span class="thm-l">Mode</span>
-      <button type="button" class="thm-b" data-theme="mono" aria-pressed="true">Mono</button>
-      <button type="button" class="thm-b" data-theme="ultra" aria-pressed="false">Ultra</button>
-      <button type="button" class="thm-b" data-theme="light" aria-pressed="false">White</button>
-      <button type="button" class="thm-b" data-theme="dark" aria-pressed="false">Black</button>
-      <span class="thm-l" style="opacity:.5">[T]</span>
       <span class="thm-l" style="opacity:.5">[V] view</span>
     </div>
 
     <header class="hero">
       <div class="eyebrow">// PROCEDURE REFERENCE · CYBER LAB //</div>
       <h1 class="brand">
-        <svg class="logo-orb" viewBox="0 0 100 100" aria-hidden="true">
-          <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="16"/>
-          <rect class="orb-cut" x="44" y="82" width="12" height="16"/>
-        </svg>
         <span class="word">LAB<em>SOP</em></span>
       </h1>
       <div class="brand-strip">
@@ -1134,7 +905,7 @@
 <h2><span class="bar"></span>三、樟腦秤重<span class="idx">SEC 03</span></h2>
 <div class="card">
   <div class="params">
-    <div class="k">秤重</div><div class="v">1.22 mg</div>
+    <div class="k">秤重</div><div class="v"><span data-sync="cam">1.24</span> mg</div>
   </div>
   <div class="warn" style="margin-top:8px">⚠ CU 吹乾後再量 — 樟腦會揮發</div>
 </div>
@@ -1233,13 +1004,172 @@
   <table>
     <tr><th>Stage</th><th>時間</th><th>溫度</th><th>Ar</th><th>H₂</th><th>備註</th></tr>
     <tr><td>1</td><td>60 min</td><td>980°C</td><td>200</td><td>—</td><td>—</td></tr>
-    <tr><td>2</td><td>20 min</td><td>980°C</td><td>—</td><td>100</td><td>—</td></tr>
-    <tr><td>3</td><td>10 min</td><td>950°C</td><td>98</td><td>8</td><td>—</td></tr>
-    <tr><td>4</td><td>10 min</td><td>950°C</td><td>98</td><td>8</td><td><span class="tag" style="color:var(--accent-gr)">🔥加熱</span> 氣體加熱 ON<br>樟腦加熱 ON</td></tr>
-    <tr><td>5</td><td>放涼</td><td>—</td><td>98</td><td>8</td><td>氣體加熱 OFF<br>樟腦加熱 OFF</td></tr>
+    <tr><td>2</td><td>30 min</td><td>980°C</td><td>—</td><td>100</td><td>H₂ 退火延長（原銅箔 20 min）</td></tr>
+    <tr><td>3</td><td>10 min</td><td>950°C</td><td><span data-sync="ar">98</span></td><td><span data-sync="h2">8</span></td><td>（原 Ar:H₂ = 98:8）</td></tr>
+    <tr><td>4</td><td><span data-sync="t4">10</span> min</td><td>950°C</td><td><span data-sync="ar">98</span></td><td><span data-sync="h2">8</span></td><td><span class="tag" style="color:var(--accent-gr)">🔥加熱</span> 氣體加熱 ON<br>樟腦 <b><span data-sync="cam">1.24</span> mg</b> 加熱 ON<br>（原 Ar:H₂ = 98:8）</td></tr>
+    <tr><td>5</td><td>放涼</td><td>—</td><td><span data-sync="ar">98</span></td><td><span data-sync="h2">8</span></td><td>氣體加熱 OFF<br>樟腦加熱 OFF<br>（原 Ar:H₂ = 98:8）</td></tr>
   </table>
 </div>
 </div>
+
+<!-- ===== 8B: GR MAKE DICE ===== -->
+<div class="section">
+<h2><span class="bar"></span>🎲 GR MAKE 今日配方骰<span class="idx">DICE</span></h2>
+<div class="card" id="grDice">
+  <div style="font-size:.8rem;color:var(--muted);margin-bottom:8px">只擲 Stage 3–4 的變數（樟腦 ≥ 1.24 mg、Stage 4 ≥ 10 min，且只會擲出落在「單層區間」的組合）；擲完後下方 SEC 03 樟腦秤重、SEC 08 參數表與流程總覽會自動同步成骰出的數值（粉色標記）；Stage 1–2、溫度、Ar+H₂ 總流量（106）固定不變。開啟頁面時會保留上一次擲骰的結果與時間（存在這台裝置的這個瀏覽器），可手動重擲。</div>
+  <div class="dice-row">
+    <div class="die-box"><div class="die" id="dieCam">1.24</div><div class="die-lbl">樟腦 mg</div></div>
+    <div class="die-box"><div class="die" id="dieH2">98:8</div><div class="die-lbl">生長階段 Ar:H₂ 比例</div></div>
+    <div class="die-box"><div class="die" id="dieTime">10</div><div class="die-lbl">Stage 4 時間 min</div></div>
+  </div>
+  <table>
+    <tr><th>項目</th><th>目前配方</th></tr>
+    <tr><td>擲骰時間</td><td id="dcWhen">尚未擲過（顯示預設配方）</td></tr>
+    <tr><td>Stage 3 / 4 Ar : H₂</td><td id="dcGas">98 : 8</td></tr>
+    <tr><td>H₂ 佔比</td><td id="dcFrac">7.5%</td></tr>
+    <tr><td>樟腦 / Stage 4 時間</td><td id="dcCT">1.24 mg / 10 min</td></tr>
+    <tr><td>碳/氫指數（基準=1.00）</td><td id="dcIdx">1.00</td></tr>
+    <tr><td>預測傾向</td><td id="dcPred" class="good">—</td></tr>
+  </table>
+  <div class="dice-btns">
+    <button id="dieRoll" type="button">🎲 重擲</button>
+    <button id="dieDaily" type="button">📅 今日配方</button>
+    <button id="dieBase" type="button">↺ 基準 98:8</button>
+  </div>
+  <details class="dice-hist" id="dcHist">
+    <summary>🕘 擲骰紀錄（最近 20 筆）</summary>
+    <div id="dcHistList" class="hist-list"></div>
+    <button id="dcHistClear" type="button" class="hist-clear">清除紀錄</button>
+  </details>
+  <div class="tip"><span class="lbl">📚</span>依據 APCVD 文獻趨勢：碳源濃度 / 通量越高、H₂ 越低、總流量越大或溫度越低 → 層數增加；H₂ 蝕刻會抑制多層並使晶粒趨向六角形。例：CH₄:H₂:Ar = 1:90:1500 sccm（975°C）可得單層，增加 CH₄ 則層數上升（<a style="color:var(--accent)" href="https://scholarworks.bwise.kr/cau/handle/2019.sw.cau/6417" target="_blank" rel="noopener">Effects of Process Parameters on APCVD Graphene</a>）；H₂/CH₄/Ar = 20/1/979 sccm、1000°C 亦報導單層（<a style="color:var(--accent)" href="https://arxiv.org/pdf/1403.7964" target="_blank" rel="noopener">arXiv 1403.7964</a>）；層數控制主要受溫度與總流量影響（<a style="color:var(--accent)" href="https://pubs.rsc.org/en/content/getauthorversionpdf/C4CC04928D" target="_blank" rel="noopener">ChemComm</a>）。</div>
+  <div style="font-size:.76rem;color:var(--muted)">⚠ 本實驗碳源為樟腦（非 CH₄），「指數」= (樟腦 mg ÷ 1.24) × (時間 ÷ 10) ÷ (H₂ ÷ 8)，僅為依文獻趨勢設計的經驗指標，非定量模型；請以 Raman（I2D/IG、D 峰）驗證。</div>
+</div>
+</div>
+<script>
+(function(){
+  var H2=[4,6,8,10,12,14], CAM=[1.24,1.5,1.8,2.1,2.5,3.0], TM=[10,12,14,16,18,20], TOTAL=106;
+  var $=function(i){return document.getElementById(i)};
+  var dH=$('dieH2'),dC=$('dieCam'),dT=$('dieTime'),btns=['dieRoll','dieDaily','dieBase'].map($);
+  if(!dH) return;
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function rng(seed){var a=seed>>>0;return function(){a=(a+0x6D2B79F5)>>>0;var t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+  function dailyIdx(){
+    var d=new Date(),s=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(),r=rng(s*2654435761);
+    return pick(r);
+  }
+  /* 單層區間：碳/氫指數須落在 0.6–1.4（樟腦少、H₂ 足、時間短 → 單層）；不合格就重擲 */
+  function idxOf(i){return (CAM[i[1]]/1.24)*(TM[i[2]]/10)/(H2[i[0]]/8)}
+  function pick(r){
+    for(var n=0;n<200;n++){
+      var i=[Math.floor(r()*6),Math.floor(r()*6),Math.floor(r()*6)],x=idxOf(i);
+      if(x>=0.6&&x<=1.4)return i;
+    }
+    return [2,0,0];
+  }
+  function sync(h,c,t){
+    var v={ar:TOTAL-h,h2:h,cam:c,t4:t};
+    document.querySelectorAll('[data-sync]').forEach(function(n){
+      n.textContent=v[n.getAttribute('data-sync')];n.classList.add('synced');
+    });
+  }
+  var big=$('bigDice'),ov=$('diceOv'),ovT=null;
+  var twin={dieH2:[$('tdH2'),$('ovH2')],dieCam:[$('tdCam'),$('ovCam')],dieTime:[$('tdTime'),$('ovTime')]};
+  btns.push(big);
+  function show(el,v,u){
+    if(el===dH)v=(TOTAL-v)+':'+v;
+    el.innerHTML=v+(u?'<small>'+u+'</small>':'');
+    twin[el.id].forEach(function(w){w.textContent=v});
+  }
+  function fx(el,add,rm){
+    [el].concat(twin[el.id]).forEach(function(n){if(rm)n.classList.remove(rm);if(add)n.classList.add(add)});
+  }
+  function ovOn(){clearTimeout(ovT);ov.classList.add('on')}
+  function ovOff(ms){clearTimeout(ovT);ovT=setTimeout(function(){ov.classList.remove('on')},ms)}
+  ov.onclick=function(){ov.classList.remove('on')};
+  function result(i){
+    var h=H2[i[0]],c=CAM[i[1]],t=TM[i[2]],idx=idxOf(i);
+    sync(h,c,t);
+    $('dcGas').textContent=(TOTAL-h)+' : '+h;
+    $('dcFrac').textContent=(h/TOTAL*100).toFixed(1)+'%';
+    $('dcCT').textContent=c+' mg / '+t+' min';
+    $('dcIdx').textContent=idx.toFixed(2);
+    var p=$('dcPred'),txt,cls='good';
+    if(idx<0.6){txt='碳源偏少：可能不連續 / 覆蓋不足';cls='warn'}
+    else if(idx<1.5){txt='單層區間（最接近基準）'}
+    else if(idx<3){txt='單～雙層（少層傾向）';cls='warn'}
+    else{txt='多層傾向（碳多、H₂ 少）';cls='warn'}
+    p.textContent=txt;p.className=cls;
+    var sum='Ar '+(TOTAL-h)+' : H₂ '+h+' · '+c+' mg · '+t+' min — '+txt;
+    $('tdSum').textContent=sum;$('ovSum').textContent=sum;
+  }
+  function land(i){
+    show(dH,H2[i[0]]);show(dC,CAM[i[1]]);show(dT,TM[i[2]]);
+    [dH,dC,dT].forEach(function(d){fx(d,null,'rolling');fx(d,null,'landed');void d.offsetWidth;fx(d,'landed')});
+    result(i);
+  }
+  /* 擲骰紀錄：存在 localStorage（只在這台裝置的這個瀏覽器），保留最近 20 筆 */
+  var KEY='gr-dice-v1',hist=[];
+  function loadH(){
+    try{
+      var o=JSON.parse(localStorage.getItem(KEY)||'[]');
+      if(Array.isArray(o))hist=o.filter(function(e){
+        return e&&Array.isArray(e.i)&&e.i.length===3&&e.i.every(function(n){return n>=0&&n<6})&&isFinite(e.t);
+      }).slice(0,20);
+    }catch(e){hist=[]}
+  }
+  function saveH(){try{localStorage.setItem(KEY,JSON.stringify(hist))}catch(e){}}
+  function p2(n){return n<10?'0'+n:''+n}
+  function fmt(ts){var d=new Date(ts);return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+' '+p2(d.getHours())+':'+p2(d.getMinutes())}
+  function setWhen(ts){
+    $('dcWhen').textContent=ts?fmt(ts):'尚未擲過（顯示預設配方）';
+    $('tdWhen').textContent=ts?'擲骰時間 '+fmt(ts):'尚未擲過';
+  }
+  function renderH(){
+    var box=$('dcHistList');box.textContent='';
+    if(!hist.length){var e=document.createElement('div');e.className='hist-empty';e.textContent='還沒有紀錄';box.appendChild(e);return}
+    hist.forEach(function(en,k){
+      var r=document.createElement('div');r.className='hist-row';
+      var tm=document.createElement('span');tm.className='tm';tm.textContent=fmt(en.t);
+      var h=H2[en.i[0]],rc=document.createElement('span');rc.className='rc';
+      rc.textContent='Ar '+(TOTAL-h)+' : H₂ '+h+' · '+CAM[en.i[1]]+' mg · '+TM[en.i[2]]+' min';
+      var b=document.createElement('button');b.type='button';b.textContent='套用';
+      b.onclick=function(){if(b.disabled||big.disabled)return;land(en.i);commit(en.i)};
+      r.appendChild(tm);r.appendChild(rc);r.appendChild(b);box.appendChild(r);
+    });
+  }
+  function commit(i){
+    hist.unshift({i:i.slice(),t:Date.now()});hist=hist.slice(0,20);
+    saveH();setWhen(hist[0].t);renderH();
+  }
+  $('dcHistClear').onclick=function(){hist=[];saveH();renderH();setWhen(null)};
+  function roll(idx){
+    if(reduce){land(idx);commit(idx);return}
+    btns.forEach(function(b){b.disabled=true});
+    var dice=[[dH,H2],[dC,CAM],[dT,TM]],stops=[1900,1300,2500],t0=Date.now();
+    $('ovSum').textContent='';ovOn();
+    dice.forEach(function(x){fx(x[0],'rolling','landed')});
+    var done=[false,false,false];
+    var iv=setInterval(function(){
+      var el=Date.now()-t0;
+      dice.forEach(function(x,k){
+        if(done[k])return;
+        if(el>=stops[k]){done[k]=true;fx(x[0],null,'rolling');show(x[0],x[1][idx[k]]);fx(x[0],'landed')}
+        else show(x[0],x[1][Math.floor(Math.random()*6)]);
+      });
+      if(done[0]&&done[1]&&done[2]){clearInterval(iv);result(idx);btns.forEach(function(b){b.disabled=false});commit(idx);ovOff(1800)}
+    },70);
+  }
+  function rand(){return pick(Math.random)}
+  big.onclick=function(){roll(rand())};
+  $('dieRoll').onclick=function(){roll(rand())};
+  $('dieDaily').onclick=function(){roll(dailyIdx())};
+  $('dieBase').onclick=function(){roll([0,2,0])};
+  loadH();
+  if(hist.length){land(hist[0].i);setWhen(hist[0].t)}
+  else{land(dailyIdx());setWhen(null)}
+  renderH();
+})();
+</script>
 
 <!-- ===== 9: POST COOLING ===== -->
 <div class="section">
@@ -1307,17 +1237,17 @@
 <span class="dim">┌─ 準備 ──────────────────────────┐</span>
 PMMA <span class="dim">(0.2g+10mL丙酮, 500rpm 8h)</span>
 CU 裁切 <span class="hl2">1×1cm</span> → HCl → 紅黃水 → 吹乾
-樟腦秤重 <span class="hl2">1.22mg</span> <span class="dim">(CU吹乾後)</span>
+樟腦秤重 <span class="hl2"><span data-sync="cam">1.24</span>mg</span> <span class="dim">(CU吹乾後)</span>
 <span class="dim">└────────────────────────────────┘</span>
               ↓
 <span class="dim">┌─ CVD 生長 ───────────────────────┐</span>
 開水冷 → 開氣體閥 → 抽真空 <span class="dim">(2.0×10⁻²)</span>
 Prg0→1 設定 → 通 Ar<span class="hl2">200</span> → 放樣品 → RUN
   <span class="hl">Stage1</span> <span class="dim">60min / 980°C / Ar200</span>
-→ <span class="hl">Stage2</span> <span class="dim">20min / 980°C / H₂100</span>
-→ <span class="hl">Stage3</span> <span class="dim">10min / 950°C / Ar98+H₂8</span>
-→ <span class="hl">Stage4</span> <span class="dim">10min / 950°C / Ar98+H₂8 + </span><span class="hl2">🔥樟腦</span>
-→ <span class="hl">Stage5</span> <span class="dim">降溫 / Ar98+H₂8 / 自然冷卻</span>
+→ <span class="hl">Stage2</span> <span class="dim">30min / 980°C / H₂100</span>
+→ <span class="hl">Stage3</span> <span class="dim">10min / 950°C / Ar<span data-sync="ar">98</span>+H₂<span data-sync="h2">8</span></span>
+→ <span class="hl">Stage4</span> <span class="dim"><span data-sync="t4">10</span>min / 950°C / Ar<span data-sync="ar">98</span>+H₂<span data-sync="h2">8</span> + </span><span class="hl2">🔥樟腦</span>
+→ <span class="hl">Stage5</span> <span class="dim">降溫 / Ar<span data-sync="ar">98</span>+H₂<span data-sync="h2">8</span> / 自然冷卻</span>
 <span class="dim">└────────────────────────────────┘</span>
               ↓
 <span class="dim">┌─ 放涼取出 ───────────────────────┐</span>
@@ -1921,12 +1851,6 @@ V4 INERT GAS <span class="hl2">關</span> → <span class="hl">V1 左下 FEED �
       <span class="sbs-title" id="sbsTitle">STEP BY STEP</span>
       <span class="sbs-counter" id="sbsCounter"></span>
     </div>
-    <div class="sbs-themes">
-      <button type="button" class="thm-b" data-theme="mono">M</button>
-      <button type="button" class="thm-b" data-theme="ultra">U</button>
-      <button type="button" class="thm-b" data-theme="light">W</button>
-      <button type="button" class="thm-b" data-theme="dark">B</button>
-    </div>
     <div class="sbs-viewport" id="sbsViewport"></div>
     <div class="sbs-nav">
       <button class="sbs-nav-btn" id="sbsPrev" disabled><span class="arrow">‹</span> 上一步</button>
@@ -2040,67 +1964,6 @@ function switchPanel(name){
     fade.onfinish = finish;
   };
 })();
-/* ============================================================
-   COLOUR MODE SWITCHER — mono / ultra / light / dark
-   ============================================================ */
-(function themeSwitcher(){
-  const THEME_ORDER = ['mono','ultra','light','dark'];
-  const FAV = {
-    mono:  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23111111'/%3E%3Ccircle cx='50' cy='50' r='39' fill='none' stroke='%23ffffff' stroke-width='14'/%3E%3Crect x='44' y='80' width='12' height='14' fill='%23111111'/%3E%3C/svg%3E",
-    ultra: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230b0016'/%3E%3Ccircle cx='50' cy='50' r='39' fill='none' stroke='%23D6FF00' stroke-width='14'/%3E%3Crect x='44' y='80' width='12' height='14' fill='%230b0016'/%3E%3C/svg%3E",
-    light: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23ffffff'/%3E%3Ccircle cx='50' cy='50' r='39' fill='none' stroke='%23ff0000' stroke-width='14'/%3E%3Crect x='44' y='80' width='12' height='14' fill='%23ffffff'/%3E%3C/svg%3E",
-    dark:  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23000000'/%3E%3Ccircle cx='50' cy='50' r='39' fill='none' stroke='%23ff0000' stroke-width='14'/%3E%3Crect x='44' y='80' width='12' height='14' fill='%23000000'/%3E%3C/svg%3E"
-  };
-  const META = { mono:'#111111', ultra:'#0b0016', light:'#ffffff', dark:'#000000' };
-
-  let fadeTimer = null;
-
-  function setTheme(name, silent){
-    if(THEME_ORDER.indexOf(name) < 0) name = 'mono';
-    const root = document.documentElement;
-
-    if(!silent){
-      root.classList.add('switching');
-      clearTimeout(fadeTimer);
-      fadeTimer = setTimeout(function(){ root.classList.remove('switching'); }, 440);
-    }
-
-    root.setAttribute('data-theme', name);
-    try{ localStorage.setItem('rk-theme', name); }catch(e){}
-
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if(meta) meta.setAttribute('content', META[name]);
-    const ico = document.querySelector('link[rel="icon"]');
-    if(ico) ico.setAttribute('href', FAV[name]);
-
-    document.querySelectorAll('.thm-b').forEach(function(b){
-      b.setAttribute('aria-pressed', b.getAttribute('data-theme') === name ? 'true' : 'false');
-    });
-  }
-
-  function cycleTheme(){
-    const cur = document.documentElement.getAttribute('data-theme') || 'mono';
-    setTheme(THEME_ORDER[(THEME_ORDER.indexOf(cur) + 1) % THEME_ORDER.length]);
-  }
-  window.LabSOP = window.LabSOP || {};
-  window.LabSOP.setTheme = setTheme;
-  window.LabSOP.cycleTheme = cycleTheme;
-
-  document.querySelectorAll('.thm-b').forEach(function(b){
-    b.addEventListener('click', function(){ setTheme(b.getAttribute('data-theme')); });
-  });
-
-  window.addEventListener('keydown', function(e){
-    if(e.metaKey || e.ctrlKey || e.altKey) return;
-    const t = e.target;
-    if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-    if(e.key === 't' || e.key === 'T'){ e.preventDefault(); cycleTheme(); }
-  });
-
-  /* 同步「首幀已決定的主題」到 UI（不重播淡入） */
-  setTheme(document.documentElement.getAttribute('data-theme') || 'mono', true);
-})();
-
 /* ============================================================
    VIEWPORT MODE SWITCHER — auto-detect + manual toggle
    Detects: screen width, touch capability, user-agent
@@ -2453,17 +2316,6 @@ function switchPanel(name){
       e.preventDefault();
       goToStep(currentIndex - 1, 'prev');
     }
-  });
-
-  // Mini theme switcher clicks inside SBS
-  const sbsThemeBtns = overlay.querySelectorAll('.thm-b');
-  sbsThemeBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const theme = btn.getAttribute('data-theme');
-      if(window.LabSOP && window.LabSOP.setTheme){
-        window.LabSOP.setTheme(theme);
-      }
-    });
   });
 
   // Close when tapping outside phone frame
