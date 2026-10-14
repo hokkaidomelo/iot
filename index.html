@@ -465,6 +465,15 @@
   .die-lbl{font-family:'Share Tech Mono';font-size:.7rem;letter-spacing:.1em;color:var(--muted)}
   [data-sync]{transition:background-color .4s,color .4s}
   [data-sync].synced{background:var(--chip-bg);color:var(--accent);font-weight:700;border-radius:3px;padding:0 3px}
+  .dice-mode{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 0;position:relative;z-index:6;font-family:'Share Tech Mono';font-size:11px;letter-spacing:.08em}
+  .dice-mode button,.dice-mode select{
+    background:var(--panel-solid);border:1px solid var(--line);border-radius:8px;color:var(--fg);
+    font-family:inherit;font-size:inherit;letter-spacing:inherit;padding:8px 12px;cursor:pointer;transition:.2s}
+  .dice-mode button:hover:not(:disabled){border-color:var(--accent)}
+  .dice-mode button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+  .dice-mode button:disabled,.dice-mode select:disabled{opacity:.5;cursor:default}
+  .dice-mode label{align-items:center;gap:6px;color:var(--muted)}
+  .dice-mode select:focus-visible,.dice-mode button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
   .dice-hist{margin-top:12px;font-size:.8rem}
   .dice-hist summary{cursor:pointer;color:var(--accent);font-family:'Share Tech Mono';letter-spacing:.08em}
   .hist-list{margin-top:8px;display:flex;flex-direction:column;gap:4px}
@@ -828,6 +837,11 @@
       </span>
       <span class="bd-txt"><b>🎲 點我擲骰 Roll GR</b><small id="tdSum">Ar 98 : H₂ 8 · 1.24 mg · 10 min</small><small class="bd-when" id="tdWhen">尚未擲過</small></span>
     </button>
+    <div class="dice-mode" id="diceMode" role="group" aria-label="擲骰模式">
+      <button type="button" id="modeAll" aria-pressed="true">🎲 全隨機</button>
+      <button type="button" id="modeGas" aria-pressed="false">⚗ 指定氣體比例＋隨機樟腦</button>
+      <label id="gasWrap" style="display:none">Ar:H₂ <select id="gasSel"></select></label>
+    </div>
 
     <!-- viewport mode toggle -->
     <div class="vp-toggle" id="vpToggle">
@@ -1016,7 +1030,7 @@
 <div class="section">
 <h2><span class="bar"></span>🎲 GR MAKE 今日配方骰<span class="idx">DICE</span></h2>
 <div class="card" id="grDice">
-  <div style="font-size:.8rem;color:var(--muted);margin-bottom:8px">只擲 Stage 3–4 的變數（樟腦 ≥ 1.24 mg、Stage 4 ≥ 10 min，且只會擲出落在「單層區間」的組合）；擲完後下方 SEC 03 樟腦秤重、SEC 08 參數表與流程總覽會自動同步成骰出的數值（粉色標記）；Stage 1–2、溫度、Ar+H₂ 總流量（106）固定不變。開啟頁面時會保留上一次擲骰的結果與時間（存在這台裝置的這個瀏覽器），可手動重擲。</div>
+  <div style="font-size:.8rem;color:var(--muted);margin-bottom:8px">只擲 Stage 3–4 的變數（樟腦 ≥ 1.24 mg、Stage 4 ≥ 10 min，且只會擲出落在「單層區間」的組合）；擲完後下方 SEC 03 樟腦秤重、SEC 08 參數表與流程總覽會自動同步成骰出的數值（粉色標記）；Stage 1–2、溫度、Ar+H₂ 總流量（106）固定不變。開啟頁面時會保留上一次擲骰的結果與時間（存在這台裝置的這個瀏覽器），可手動重擲。<br>模式在頁面最上方大按鈕下方切換：<b>全隨機</b>（三顆骰子都隨機）／<b>指定氣體比例＋隨機樟腦</b>（自己選 Ar:H₂，Stage 4 固定 10 min，樟腦在 ≥1.24 mg 且維持單層的範圍內以 0.01 mg 隨機）。每次抽籤都會避開最近 25 次出現過的配方。</div>
   <div class="dice-row">
     <div class="die-box"><div class="die" id="dieCam">1.24</div><div class="die-lbl">樟腦 mg</div></div>
     <div class="die-box"><div class="die" id="dieH2">98:8</div><div class="die-lbl">生長階段 Ar:H₂ 比例</div></div>
@@ -1025,6 +1039,8 @@
   <table>
     <tr><th>項目</th><th>目前配方</th></tr>
     <tr><td>擲骰時間</td><td id="dcWhen">尚未擲過（顯示預設配方）</td></tr>
+    <tr><td>擲骰模式</td><td id="dcMode">全隨機</td></tr>
+    <tr><td>抽籤備註</td><td id="dcNote">—</td></tr>
     <tr><td>Stage 3 / 4 Ar : H₂</td><td id="dcGas">98 : 8</td></tr>
     <tr><td>H₂ 佔比</td><td id="dcFrac">7.5%</td></tr>
     <tr><td>樟腦 / Stage 4 時間</td><td id="dcCT">1.24 mg / 10 min</td></tr>
@@ -1037,7 +1053,7 @@
     <button id="dieBase" type="button">↺ 基準 98:8</button>
   </div>
   <details class="dice-hist" id="dcHist">
-    <summary>🕘 擲骰紀錄（最近 20 筆）</summary>
+    <summary>🕘 擲骰紀錄（最近 25 筆）</summary>
     <div id="dcHistList" class="hist-list"></div>
     <button id="dcHistClear" type="button" class="hist-clear">清除紀錄</button>
   </details>
@@ -1048,73 +1064,56 @@
 <script>
 (function(){
   var H2=[4,6,8,10,12,14], CAM=[1.24,1.5,1.8,2.1,2.5,3.0], TM=[10,12,14,16,18,20], TOTAL=106;
+  var CMIN=1.24, CMAX=3.0, SMIN=0.6, SMAX=1.4, NOREPEAT=25, KEEP=25;
   var $=function(i){return document.getElementById(i)};
-  var dH=$('dieH2'),dC=$('dieCam'),dT=$('dieTime'),btns=['dieRoll','dieDaily','dieBase'].map($);
+  var dH=$('dieH2'),dC=$('dieCam'),dT=$('dieTime');
   if(!dH) return;
+  var btns=['dieRoll','dieDaily','dieBase','modeAll','modeGas','gasSel'].map($);
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function rng(seed){var a=seed>>>0;return function(){a=(a+0x6D2B79F5)>>>0;var t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
-  function dailyIdx(){
-    var d=new Date(),s=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(),r=rng(s*2654435761);
-    return pick(r);
-  }
-  /* 單層區間：碳/氫指數須落在 0.6–1.4（樟腦少、H₂ 足、時間短 → 單層）；不合格就重擲 */
-  function idxOf(i){return (CAM[i[1]]/1.24)*(TM[i[2]]/10)/(H2[i[0]]/8)}
-  function pick(r){
-    for(var n=0;n<200;n++){
-      var i=[Math.floor(r()*6),Math.floor(r()*6),Math.floor(r()*6)],x=idxOf(i);
-      if(x>=0.6&&x<=1.4)return i;
-    }
-    return [2,0,0];
-  }
-  function sync(h,c,t){
-    var v={ar:TOTAL-h,h2:h,cam:c,t4:t};
-    document.querySelectorAll('[data-sync]').forEach(function(n){
-      n.textContent=v[n.getAttribute('data-sync')];n.classList.add('synced');
-    });
-  }
   var big=$('bigDice'),ov=$('diceOv'),ovT=null;
   var twin={dieH2:[$('tdH2'),$('ovH2')],dieCam:[$('tdCam'),$('ovCam')],dieTime:[$('tdTime'),$('ovTime')]};
   btns.push(big);
-  function show(el,v,u){
-    if(el===dH)v=(TOTAL-v)+':'+v;
-    el.innerHTML=v+(u?'<small>'+u+'</small>':'');
-    twin[el.id].forEach(function(w){w.textContent=v});
+
+  /* ---------- 基本計算 ---------- */
+  function rng(seed){var a=seed>>>0;return function(){a=(a+0x6D2B79F5)>>>0;var t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+  function idxOf(r){return (r.c/CMIN)*(r.m/10)/(r.h/8)}   /* 碳/氫指數，基準 1.00 */
+  function fc(c){return String(+(+c).toFixed(2))}
+  function key(r){return r.h+'|'+(+r.c).toFixed(2)+'|'+r.m}
+
+  /* 模式一：全隨機 — 三顆骰子的所有組合中，指數落在單層區間者 */
+  function allCands(){
+    var a=[];
+    H2.forEach(function(h){CAM.forEach(function(c){TM.forEach(function(m){
+      var r={h:h,c:c,m:m},x=idxOf(r);if(x>=SMIN&&x<=SMAX)a.push(r);
+    })})});
+    return a;
   }
-  function fx(el,add,rm){
-    [el].concat(twin[el.id]).forEach(function(n){if(rm)n.classList.remove(rm);if(add)n.classList.add(add)});
+  /* 模式二：指定氣體比例 — Stage 4 固定 10 min，樟腦在「≥1.24 mg 且指數在單層區間」內以 0.01 mg 為單位隨機 */
+  function gasRange(h){
+    var f=(h/8)*CMIN;
+    return [Math.max(Math.round(CMIN*100),Math.ceil(SMIN*f*100-1e-9)),Math.min(Math.round(CMAX*100),Math.floor(SMAX*f*100+1e-9))];
   }
-  function ovOn(){clearTimeout(ovT);ov.classList.add('on')}
-  function ovOff(ms){clearTimeout(ovT);ovT=setTimeout(function(){ov.classList.remove('on')},ms)}
-  ov.onclick=function(){ov.classList.remove('on')};
-  function result(i){
-    var h=H2[i[0]],c=CAM[i[1]],t=TM[i[2]],idx=idxOf(i);
-    sync(h,c,t);
-    $('dcGas').textContent=(TOTAL-h)+' : '+h;
-    $('dcFrac').textContent=(h/TOTAL*100).toFixed(1)+'%';
-    $('dcCT').textContent=c+' mg / '+t+' min';
-    $('dcIdx').textContent=idx.toFixed(2);
-    var p=$('dcPred'),txt,cls='good';
-    if(idx<0.6){txt='碳源偏少：可能不連續 / 覆蓋不足';cls='warn'}
-    else if(idx<1.5){txt='單層區間（最接近基準）'}
-    else if(idx<3){txt='單～雙層（少層傾向）';cls='warn'}
-    else{txt='多層傾向（碳多、H₂ 少）';cls='warn'}
-    p.textContent=txt;p.className=cls;
-    var sum='Ar '+(TOTAL-h)+' : H₂ '+h+' · '+c+' mg · '+t+' min — '+txt;
-    $('tdSum').textContent=sum;$('ovSum').textContent=sum;
+  function gasOk(h){var g=gasRange(h);return g[0]<=g[1]}
+  function gasCands(h){
+    var g=gasRange(h),a=[];
+    for(var k=g[0];k<=g[1];k++)a.push({h:h,c:k/100,m:10});
+    return a;
   }
-  function land(i){
-    show(dH,H2[i[0]]);show(dC,CAM[i[1]]);show(dT,TM[i[2]]);
-    [dH,dC,dT].forEach(function(d){fx(d,null,'rolling');fx(d,null,'landed');void d.offsetWidth;fx(d,'landed')});
-    result(i);
-  }
-  /* 擲骰紀錄：存在 localStorage（只在這台裝置的這個瀏覽器），保留最近 20 筆 */
-  var KEY='gr-dice-v1',hist=[];
+
+  /* ---------- 紀錄（localStorage，只在這台裝置的這個瀏覽器） ---------- */
+  var KEY='gr-dice-v1',MKEY='gr-dice-mode-v1',hist=[];
   function loadH(){
     try{
       var o=JSON.parse(localStorage.getItem(KEY)||'[]');
-      if(Array.isArray(o))hist=o.filter(function(e){
-        return e&&Array.isArray(e.i)&&e.i.length===3&&e.i.every(function(n){return n>=0&&n<6})&&isFinite(e.t);
-      }).slice(0,20);
+      if(!Array.isArray(o))return;
+      o.forEach(function(e){
+        if(!e)return;
+        var r=null;
+        if(Array.isArray(e.i)&&e.i.length===3&&e.i.every(function(n){return n>=0&&n<6})) r={h:H2[e.i[0]],c:CAM[e.i[1]],m:TM[e.i[2]],ts:e.t};   /* 舊格式 */
+        else if(H2.indexOf(e.h)>=0&&isFinite(e.c)&&isFinite(e.m)) r={h:e.h,c:+e.c,m:+e.m,ts:e.ts};
+        if(r&&isFinite(r.ts))hist.push(r);
+      });
+      hist=hist.slice(0,KEEP);
     }catch(e){hist=[]}
   }
   function saveH(){try{localStorage.setItem(KEY,JSON.stringify(hist))}catch(e){}}
@@ -1124,28 +1123,118 @@
     $('dcWhen').textContent=ts?fmt(ts):'尚未擲過（顯示預設配方）';
     $('tdWhen').textContent=ts?'擲骰時間 '+fmt(ts):'尚未擲過';
   }
+  function recipeText(r){return 'Ar '+(TOTAL-r.h)+' : H₂ '+r.h+' · '+fc(r.c)+' mg · '+r.m+' min'}
   function renderH(){
     var box=$('dcHistList');box.textContent='';
     if(!hist.length){var e=document.createElement('div');e.className='hist-empty';e.textContent='還沒有紀錄';box.appendChild(e);return}
-    hist.forEach(function(en,k){
+    hist.forEach(function(en){
       var r=document.createElement('div');r.className='hist-row';
-      var tm=document.createElement('span');tm.className='tm';tm.textContent=fmt(en.t);
-      var h=H2[en.i[0]],rc=document.createElement('span');rc.className='rc';
-      rc.textContent='Ar '+(TOTAL-h)+' : H₂ '+h+' · '+CAM[en.i[1]]+' mg · '+TM[en.i[2]]+' min';
+      var tm=document.createElement('span');tm.className='tm';tm.textContent=fmt(en.ts);
+      var rc=document.createElement('span');rc.className='rc';rc.textContent=recipeText(en);
       var b=document.createElement('button');b.type='button';b.textContent='套用';
-      b.onclick=function(){if(b.disabled||big.disabled)return;land(en.i);commit(en.i)};
+      b.onclick=function(){if(big.disabled)return;var c={h:en.h,c:en.c,m:en.m};land(c);setNote('');commit(c)};
       r.appendChild(tm);r.appendChild(rc);r.appendChild(b);box.appendChild(r);
     });
   }
-  function commit(i){
-    hist.unshift({i:i.slice(),t:Date.now()});hist=hist.slice(0,20);
-    saveH();setWhen(hist[0].t);renderH();
+  function commit(r){
+    hist.unshift({h:r.h,c:r.c,m:r.m,ts:Date.now()});hist=hist.slice(0,KEEP);
+    saveH();setWhen(hist[0].ts);renderH();
   }
   $('dcHistClear').onclick=function(){hist=[];saveH();renderH();setWhen(null)};
-  function roll(idx){
-    if(reduce){land(idx);commit(idx);return}
+
+  /* ---------- 抽籤：不與最近 25 次相同 ---------- */
+  function choose(cands){
+    var used={};hist.slice(0,NOREPEAT).forEach(function(e){used[key(e)]=1});
+    var fresh=cands.filter(function(r){return !used[key(r)]});
+    if(fresh.length)return {r:fresh[Math.floor(Math.random()*fresh.length)],note:'已避開最近 '+NOREPEAT+' 次出現過的配方'};
+    /* 此條件下可用配方已不足：改選最久沒用過的 */
+    var best=null,bestAge=-1;
+    cands.forEach(function(r){
+      var k=key(r),age=-1;
+      for(var j=0;j<hist.length;j++){if(key(hist[j])===k){age=j;break}}
+      if(age<0)age=1e9;
+      if(age>bestAge||(age===bestAge&&Math.random()<.5)){best=r;bestAge=age}
+    });
+    return {r:best,note:'⚠ 此條件下可用配方不足 '+NOREPEAT+' 種（共 '+cands.length+' 種），已改選最久沒用過的'};
+  }
+  var mode='all',gas=8;
+  function pickNew(){return mode==='gas'?choose(gasCands(gas)):choose(allCands())}
+  function dailyRoll(){
+    var d=new Date(),s=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(),r=rng(s*2654435761),c=allCands();
+    return c[Math.floor(r()*c.length)];
+  }
+
+  /* ---------- 模式選擇 ---------- */
+  var sel=$('gasSel');
+  H2.filter(gasOk).forEach(function(h){
+    var o=document.createElement('option');o.value=h;
+    var g=gasRange(h);
+    o.textContent='Ar '+(TOTAL-h)+' : H₂ '+h+'（樟腦 '+(g[0]/100).toFixed(2)+'–'+(g[1]/100).toFixed(2)+' mg）';
+    sel.appendChild(o);
+  });
+  function loadMode(){
+    try{var o=JSON.parse(localStorage.getItem(MKEY)||'{}');if(o.mode==='gas'||o.mode==='all')mode=o.mode;if(gasOk(+o.gas)&&H2.indexOf(+o.gas)>=0)gas=+o.gas}catch(e){}
+  }
+  function setMode(m,g,silent){
+    mode=m;if(g!=null)gas=g;
+    $('modeAll').setAttribute('aria-pressed',m==='all'?'true':'false');
+    $('modeGas').setAttribute('aria-pressed',m==='gas'?'true':'false');
+    $('gasWrap').style.display=m==='gas'?'inline-flex':'none';
+    sel.value=String(gas);
+    $('dcMode').textContent=m==='gas'?'指定氣體比例 Ar '+(TOTAL-gas)+' : H₂ '+gas+'＋隨機樟腦（Stage 4 固定 10 min）':'全隨機（氣體比例、樟腦、時間）';
+    if(!silent){try{localStorage.setItem(MKEY,JSON.stringify({mode:mode,gas:gas}))}catch(e){}}
+  }
+  $('modeAll').onclick=function(){setMode('all')};
+  $('modeGas').onclick=function(){setMode('gas')};
+  sel.onchange=function(){setMode('gas',+sel.value)};
+
+  /* ---------- 顯示 ---------- */
+  function setNote(t){$('dcNote').textContent=t||'—'}
+  function show(el,v){
+    var s=el===dH?(TOTAL-v)+':'+v:(el===dC?fc(v):v);
+    el.textContent=s;
+    twin[el.id].forEach(function(w){w.textContent=s});
+  }
+  function fx(el,add,rm){
+    [el].concat(twin[el.id]).forEach(function(n){if(rm)n.classList.remove(rm);if(add)n.classList.add(add)});
+  }
+  function sync(h,c,t){
+    var v={ar:TOTAL-h,h2:h,cam:fc(c),t4:t};
+    document.querySelectorAll('[data-sync]').forEach(function(n){
+      n.textContent=v[n.getAttribute('data-sync')];n.classList.add('synced');
+    });
+  }
+  function ovOn(){clearTimeout(ovT);ov.classList.add('on')}
+  function ovOff(ms){clearTimeout(ovT);ovT=setTimeout(function(){ov.classList.remove('on')},ms)}
+  ov.onclick=function(){ov.classList.remove('on')};
+  function result(r){
+    var h=r.h,c=r.c,t=r.m,idx=idxOf(r);
+    sync(h,c,t);
+    $('dcGas').textContent=(TOTAL-h)+' : '+h;
+    $('dcFrac').textContent=(h/TOTAL*100).toFixed(1)+'%';
+    $('dcCT').textContent=fc(c)+' mg / '+t+' min';
+    $('dcIdx').textContent=idx.toFixed(2);
+    var p=$('dcPred'),txt,cls='good';
+    if(idx<0.6){txt='碳源偏少：可能不連續 / 覆蓋不足';cls='warn'}
+    else if(idx<1.5){txt='單層區間（最接近基準）'}
+    else if(idx<3){txt='單～雙層（少層傾向）';cls='warn'}
+    else{txt='多層傾向（碳多、H₂ 少）';cls='warn'}
+    p.textContent=txt;p.className=cls;
+    var sum=recipeText(r)+' — '+txt;
+    $('tdSum').textContent=sum;$('ovSum').textContent=sum;
+  }
+  function land(r){
+    show(dH,r.h);show(dC,r.c);show(dT,r.m);
+    [dH,dC,dT].forEach(function(d){fx(d,null,'rolling');fx(d,null,'landed');void d.offsetWidth;fx(d,'landed')});
+    result(r);
+  }
+  function roll(r,note){
+    if(reduce){land(r);setNote(note);commit(r);return}
     btns.forEach(function(b){b.disabled=true});
-    var dice=[[dH,H2],[dC,CAM],[dT,TM]],stops=[1900,1300,2500],t0=Date.now();
+    var dice=[[dH,function(){return H2[Math.floor(Math.random()*6)]},r.h],
+              [dC,function(){return mode==='gas'?(CMIN+Math.random()*0.8).toFixed(2):CAM[Math.floor(Math.random()*6)]},r.c],
+              [dT,function(){return TM[Math.floor(Math.random()*6)]},r.m]];
+    var stops=[1900,1300,2500],t0=Date.now();
     $('ovSum').textContent='';ovOn();
     dice.forEach(function(x){fx(x[0],'rolling','landed')});
     var done=[false,false,false];
@@ -1153,21 +1242,25 @@
       var el=Date.now()-t0;
       dice.forEach(function(x,k){
         if(done[k])return;
-        if(el>=stops[k]){done[k]=true;fx(x[0],null,'rolling');show(x[0],x[1][idx[k]]);fx(x[0],'landed')}
-        else show(x[0],x[1][Math.floor(Math.random()*6)]);
+        if(el>=stops[k]){done[k]=true;fx(x[0],null,'rolling');show(x[0],x[2]);fx(x[0],'landed')}
+        else show(x[0],x[1]());
       });
-      if(done[0]&&done[1]&&done[2]){clearInterval(iv);result(idx);btns.forEach(function(b){b.disabled=false});commit(idx);ovOff(1800)}
+      if(done[0]&&done[1]&&done[2]){
+        clearInterval(iv);result(r);setNote(note);
+        btns.forEach(function(b){b.disabled=false});commit(r);ovOff(1800);
+      }
     },70);
   }
-  function rand(){return pick(Math.random)}
-  big.onclick=function(){roll(rand())};
-  $('dieRoll').onclick=function(){roll(rand())};
-  $('dieDaily').onclick=function(){roll(dailyIdx())};
-  $('dieBase').onclick=function(){roll([0,2,0])};
-  loadH();
-  if(hist.length){land(hist[0].i);setWhen(hist[0].t)}
-  else{land(dailyIdx());setWhen(null)}
-  renderH();
+  function go(){var p=pickNew();roll(p.r,p.note)}
+  big.onclick=go;
+  $('dieRoll').onclick=go;
+  $('dieDaily').onclick=function(){roll(dailyRoll(),'今日固定配方（不受「不重複」限制）')};
+  $('dieBase').onclick=function(){roll({h:8,c:1.24,m:10},'基準配方（不受「不重複」限制）')};
+
+  loadH();loadMode();setMode(mode,gas,true);
+  if(hist.length){land(hist[0]);setWhen(hist[0].ts)}
+  else{land(dailyRoll());setWhen(null)}
+  setNote('');renderH();
 })();
 </script>
 
